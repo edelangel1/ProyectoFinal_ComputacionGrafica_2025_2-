@@ -42,9 +42,4 @@
       <Filter>Archivos de origen\shader</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="proyecto final.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>
