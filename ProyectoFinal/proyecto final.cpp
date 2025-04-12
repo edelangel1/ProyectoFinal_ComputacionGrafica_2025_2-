@@ -112,7 +112,7 @@ struct Silla
 	bool sillaNueva;
 };
 //Animacion sillas
-bool animacionSilla1 = false;
+bool estadoAnimacionSillas = false;
 Silla sillas[31];
 
 // Deltatime
@@ -398,9 +398,9 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 	if (key == GLFW_KEY_N)
 	{
-		if (!animacionSilla1)
+		if (!estadoAnimacionSillas)
 		{
-			animacionSilla1 = true;
+			estadoAnimacionSillas = true;
 		}
 	}
 	if (key == GLFW_KEY_R)
@@ -412,7 +412,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 // Reiniciar la simulacion
 void reiniciar()
 {
-	animacionSilla1 = false;
+	estadoAnimacionSillas = false;
 	inicializarSillas();
 }
 
@@ -525,7 +525,7 @@ void inicializarSillas()
 
 // Animaciones
 void animacionSilla() {
-	if (!animacionSilla1) return;
+	if (!estadoAnimacionSillas) return;
 
 	// Puntos de giro
 	float paso = 0.01f;
