@@ -430,7 +430,7 @@ void reiniciar()
 // Inicializa las sillas
 void inicializarSillas()
 {
-	float posSillasY = 1.85;
+	float posSillasY = 0.4;
 	float posSillasX19_30 = 33.0f;
 	glm::vec3 posSillas[] = {
 		// silla profesor
@@ -478,27 +478,27 @@ void inicializarSillas()
 	};
 	float anguloSillas[] = {
 		// silla profesor
-		-50.0f,
+		180.0f,
 		// sillas mesa 1
-		90.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 2
-		90.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 3
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 4
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 5
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 6
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 7
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 8
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 9
-		130.0f, 130.0f, 130.0f,
+		0.0f, 0.0f, 0.0f,
 		// sillas mesa 10
-		130.0f, 130.0f, 130.0f
+		0.0f, 0.0f, 0.0f
 	};
 	int estadoAnimacion[] = {
 		// silla profesor
@@ -530,7 +530,7 @@ void inicializarSillas()
 		sillas[i].posicionActual = posSillas[i];
 		sillas[i].anguloActual = anguloSillas[i];
 		sillas[i].anguloFinal = anguloSillas[i];
-		sillas[i].scale = glm::vec3(3.0f, 3.5f, 3.0f);
+		sillas[i].scale = glm::vec3(0.5f, 0.6f, 0.5f);
 		sillas[i].estadoAnimacion = estadoAnimacion[i];
 		sillas[i].dibujar = true;
 		sillas[i].sillaNueva = false;
@@ -559,8 +559,8 @@ void animacionSilla() {
 		switch (sillas[i].estadoAnimacion)
 		{
 		case 1: // Mover silla 0 a x1
-			if (sillas[i].posicionActual.x > x1) 
-			{ 
+			if (sillas[i].posicionActual.x > x1)
+			{
 				sillas[i].posicionActual.x -= pasoPosicion;
 			}
 			else
@@ -569,18 +569,18 @@ void animacionSilla() {
 			}
 			if (abs(sillas[i].posicionActual.x - x1) <= distGiro)
 			{
-				if (sillas[i].anguloActual < 90)
+				if (sillas[i].anguloActual < 270)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 90;
+					sillas[i].anguloActual = 270;
 				}
 			}
-			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x1) 
-			{ 
-				sillas[i].estadoAnimacion = 2; 
+			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x1)
+			{
+				sillas[i].estadoAnimacion = 2;
 			}
 			break;
 		case 2: // Mover silla 0 a z1
@@ -592,18 +592,18 @@ void animacionSilla() {
 			{
 				sillas[i].posicionActual.z -= pasoPosicion;
 			}
-			if ((sillas[i].anguloActual != 360) && (abs(sillas[i].posicionActual.z - z1) <= distGiro))
+			if ((sillas[i].anguloActual != 180) && (abs(sillas[i].posicionActual.z - z1) <= distGiro))
 			{
-				if (sillas[i].anguloActual > 0)
+				if (sillas[i].anguloActual > 180)
 				{
 					sillas[i].anguloActual -= pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 360;
+					sillas[i].anguloActual = 180;
 				}
 			}
-			if (sillas[i].anguloActual == 360 && sillas[i].posicionActual.x == x1)
+			if (sillas[i].anguloActual == 180 && sillas[i].posicionActual.x == x1)
 			{
 				sillas[i].estadoAnimacion = 3;
 			}
@@ -621,28 +621,28 @@ void animacionSilla() {
 			{
 				if (i == 0)
 				{
-					if (sillas[i].anguloActual > 270)
+					if (sillas[i].anguloActual > 90)
 					{
 						sillas[i].anguloActual -= pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 270;
+						sillas[i].anguloActual = 90;
 					}
 				}
 				else
 				{
-					if (sillas[i].anguloActual < 270)
+					if (sillas[i].anguloActual < 90)
 					{
 						sillas[i].anguloActual += pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 270;
+						sillas[i].anguloActual = 90;
 					}
 				}
 			}
-			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x2)
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x2)
 			{
 				if (i == 0)
 				{
@@ -677,9 +677,18 @@ void animacionSilla() {
 			{
 				break;
 			}
+			sillas[i].scale = glm::vec3(3.0f, 3.0f, 3.0f);
 			sillas[i].posicionActual.z = z3 + (distGiro * i);
+			sillas[i].posicionActual.y = 0.1;
 			sillas[i].sillaNueva = true;
-			sillas[i].anguloActual = 90;
+			if (i < 10)
+			{
+				sillas[i].anguloActual = -90;
+			}
+			else
+			{
+				sillas[i].anguloActual = 270;
+			}
 			sillas[i].estadoAnimacion = 14;
 			break;
 		case 7: // Esperar que silla 0 llegue a z2
@@ -697,18 +706,18 @@ void animacionSilla() {
 			{
 				sillas[i].posicionActual.x += pasoPosicion;
 			}
-			if (abs(sillas[i].posicionActual.x - x3) <= (distGiro + 1.5))
+			if (abs(sillas[i].posicionActual.x - x3) <= distGiro)
 			{
-				if (sillas[i].anguloActual < 270)
+				if (sillas[i].anguloActual < 90)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 270;
+					sillas[i].anguloActual = 90;
 				}
 			}
-			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x3)
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x3)
 			{
 				sillas[i].estadoAnimacion = 9;
 			}
@@ -730,16 +739,16 @@ void animacionSilla() {
 			}
 			if (abs(sillas[i].posicionActual.z - z2) <= distGiro)
 			{
-				if (sillas[i].anguloActual > 180)
+				if (sillas[i].anguloActual > 0)
 				{
 					sillas[i].anguloActual -= pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 180;
+					sillas[i].anguloActual = 0;
 				}
 			}
-			if (sillas[i].anguloActual == 180 && sillas[i].posicionActual.z == z2)
+			if (sillas[i].anguloActual == 0 && sillas[i].posicionActual.z == z2)
 			{
 				sillas[i].estadoAnimacion = 11;
 			}
@@ -755,16 +764,16 @@ void animacionSilla() {
 			}
 			if (abs(sillas[i].posicionActual.x - x2) <= distGiro)
 			{
-				if (sillas[i].anguloActual < 270)
+				if (sillas[i].anguloActual < 90)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 270;
+					sillas[i].anguloActual = 90;
 				}
 			}
-			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x2)
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x2)
 			{
 				sillas[i].estadoAnimacion = 5;
 			}
@@ -786,21 +795,21 @@ void animacionSilla() {
 			}
 			if (abs(sillas[i].posicionActual.x - x4) <= distGiro)
 			{
-				if (sillas[i].anguloActual < 270)
+				if (sillas[i].anguloActual < 90)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 270;
+					sillas[i].anguloActual = 90;
 				}
 			}
-			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x4)
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x4)
 			{
 				sillas[i].estadoAnimacion = 10;
 			}
 			break;
-		case 14:
+		case 14: // Mover sillas 0-30 sobre x2
 			sillas[i].posicionActual.z -= pasoPosicion;
 			if (sillas[i].posicionActual.z > z3)
 			{
@@ -814,16 +823,16 @@ void animacionSilla() {
 				}
 				if (abs(sillas[i].posicionActual.z - z1) <= distGiro)
 				{
-					if (sillas[i].anguloActual < 180)
+					if (sillas[i].anguloActual < 0)
 					{
 						sillas[i].anguloActual += pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 180;
+						sillas[i].anguloActual = 0;
 					}
 				}
-				if (sillas[i].anguloActual == 180 && sillas[i].posicionActual.z == z1)
+				if (sillas[i].anguloActual == 0 && sillas[i].posicionActual.z == z1)
 				{
 					sillas[i].estadoAnimacion = 15;
 				}
@@ -858,22 +867,22 @@ void animacionSilla() {
 				}
 				if (abs(sillas[i].posicionActual.z - z2) <= distGiro)
 				{
-					if (sillas[i].anguloActual > 0)
+					if (sillas[i].anguloActual > 180)
 					{
 						sillas[i].anguloActual -= pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 0;
+						sillas[i].anguloActual = 180;
 					}
 				}
-				if (sillas[i].anguloActual == 0 && sillas[i].posicionActual.z == z2)
+				if (sillas[i].anguloActual == 180 && sillas[i].posicionActual.z == z2)
 				{
 					sillas[i].estadoAnimacion = 19;
 				}
 			}
 			break;
-		case 15:
+		case 15: // Mover silla 0 a x1
 			if (sillas[i].posicionActual.x < x1)
 			{
 				sillas[i].posicionActual.x = x1;
@@ -884,21 +893,21 @@ void animacionSilla() {
 			}
 			if (abs(sillas[i].posicionActual.x - x1) <= distGiro)
 			{
-				if (sillas[i].anguloActual < 270)
+				if (sillas[i].anguloActual < 90)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 270;
+					sillas[i].anguloActual = 90;
 				}
 			}
-			if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x1)
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x1)
 			{
 				sillas[i].estadoAnimacion = 16;
 			}
 			break;
-		case 16:
+		case 16: // Mover silla 0 a z final
 			if (sillas[i].posicionActual.z > sillas[i].posicionFinal.z)
 			{
 				sillas[i].posicionActual.z = sillas[i].posicionFinal.z;
@@ -907,23 +916,23 @@ void animacionSilla() {
 			{
 				sillas[i].posicionActual.z += pasoPosicion;
 			}
-			if ((sillas[i].anguloActual != 0) && (abs(sillas[i].posicionActual.z - sillas[i].posicionFinal.z) <= distGiro))
+			if ((sillas[i].anguloActual != 180) && (abs(sillas[i].posicionActual.z - sillas[i].posicionFinal.z) <= distGiro))
 			{
-				if (sillas[i].anguloActual < 360)
+				if (sillas[i].anguloActual < 180)
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
 				else
 				{
-					sillas[i].anguloActual = 0;
+					sillas[i].anguloActual = 180;
 				}
 			}
-			if (sillas[i].anguloActual == 0 && sillas[i].posicionActual.z == sillas[i].posicionFinal.z)
+			if (sillas[i].anguloActual == 180 && sillas[i].posicionActual.z == sillas[i].posicionFinal.z)
 			{
 				sillas[i].estadoAnimacion = 17;
 			}
 			break;
-		case 17:
+		case 17: // Mover silla 0 a x final
 			if (sillas[i].posicionActual.x > sillas[i].posicionFinal.x)
 			{
 				sillas[i].posicionActual.x = sillas[i].posicionFinal.x;
@@ -964,16 +973,16 @@ void animacionSilla() {
 				}
 				if (abs(sillas[i].posicionActual.x - x3) <= distGiro)
 				{
-					if (sillas[i].anguloActual < 90)
+					if (sillas[i].anguloActual < 270)
 					{
 						sillas[i].anguloActual += pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 90;
+						sillas[i].anguloActual = 270;
 					}
 				}
-				if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x3)
+				if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x3)
 				{
 					sillas[i].estadoAnimacion = 20;
 				}
@@ -990,16 +999,16 @@ void animacionSilla() {
 				}
 				if (abs(sillas[i].posicionActual.x - x4) <= distGiro)
 				{
-					if (sillas[i].anguloActual < 90)
+					if (sillas[i].anguloActual < 270)
 					{
 						sillas[i].anguloActual += pasoRotacion;
 					}
 					else
 					{
-						sillas[i].anguloActual = 90;
+						sillas[i].anguloActual = 270;
 					}
 				}
-				if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x4)
+				if (sillas[i].anguloActual == 270 && sillas[i].posicionActual.x == x4)
 				{
 					sillas[i].estadoAnimacion = 20;
 				}
@@ -1030,7 +1039,6 @@ void animacionSilla() {
 				sillas[i].estadoAnimacion = 18;
 			}
 		default:
-			//sillas[i].dibujar = false;
 			break;
 		}
 	}
