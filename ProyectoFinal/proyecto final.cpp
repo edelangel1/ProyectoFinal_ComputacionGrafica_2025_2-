@@ -100,6 +100,38 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(0);
 
+// ============ Keyframes ==============
+#define MAX_FRAMES 9
+int i_max_steps = 190;
+int i_curr_steps = 0;
+
+struct KeyFrameProyector {
+	float posX, posY, posZ;
+	float rotY;
+	float incX, incY, incZ;
+	float incRotY;
+};
+
+KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
+	{ 6.0f, 5.0f, -11.0f, 0.0f },    // Posición inicial
+	{ 6.0f, 5.0f, -11.0f, 0.0f },
+	{ 6.0f, 5.0f, 30.0f, 0.0f },
+	//{ 10.0f, 1.8f, -25.0f, 0.0f },
+	//{ 15.0f, 1.8f, -25.0f, 0.0f },
+	{}, {}, {}, {} // vacíos
+};
+
+int FrameIndexProyector = 5;
+int PlayIndexProyector = 0;
+bool playProyector = false;
+
+float proyectorPosX = 6.0f, proyectorPosY = 5.0f, proyectorPosZ = -11.0f;
+float proyectorRotY = 0.0f;
+// ======================================
+
+
+
+
 // estructura modelo silla
 struct Silla
 {
@@ -119,6 +151,39 @@ Silla sillas[31];
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
+
+
+// ======== Funciones para Keyframes ===============
+void interpolarProyector() {
+	ProyectorKF[PlayIndexProyector].incX = (ProyectorKF[PlayIndexProyector + 1].posX - ProyectorKF[PlayIndexProyector].posX) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incY = (ProyectorKF[PlayIndexProyector + 1].posY - ProyectorKF[PlayIndexProyector].posY) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
+}
+
+void animarProyector() {
+	if (playProyector) {
+		if (i_curr_steps >= i_max_steps) {
+			PlayIndexProyector++;
+			if (PlayIndexProyector >= FrameIndexProyector - 1) {
+				playProyector = false;
+			}
+			else {
+				i_curr_steps = 0;
+				interpolarProyector();
+			}
+		}
+		else {
+			proyectorPosX += ProyectorKF[PlayIndexProyector].incX;
+			proyectorPosY += ProyectorKF[PlayIndexProyector].incY;
+			proyectorPosZ += ProyectorKF[PlayIndexProyector].incZ;
+			proyectorRotY += ProyectorKF[PlayIndexProyector].incRotY;
+			i_curr_steps++;
+		}
+	}
+}
+
+
 
 int main()
 {
@@ -211,6 +276,8 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		animacionSilla();
+		animarProyector();
+
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -310,13 +377,16 @@ int main()
 		}
 
 
-		// Proyector
+		// Proyector animado con KeyFrames
 		glm::mat4 modelProyector(1);
 		modelProyector = glm::mat4(1);
-		modelProyector = glm::rotate(modelProyector, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelProyector = glm::scale(modelProyector, glm::vec3(2.0f, 2.0f, 2.0f));
+		modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
+		modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
+		modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		proyector.Draw(lightingShader);
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -430,6 +500,19 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	{
 		reiniciar();
 	}
+	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+		if (!playProyector && FrameIndexProyector > 1) {
+			PlayIndexProyector = 0;
+			i_curr_steps = 0;
+			proyectorPosX = ProyectorKF[0].posX;
+			proyectorPosY = ProyectorKF[0].posY;
+			proyectorPosZ = ProyectorKF[0].posZ;
+			proyectorRotY = ProyectorKF[0].rotY;
+			interpolarProyector();
+			playProyector = true;
+		}
+	}
+
 }
 
 // Reiniciar la simulacion
