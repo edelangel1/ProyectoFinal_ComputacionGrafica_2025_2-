@@ -172,6 +172,7 @@ int main()
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 	Model salon((char*)"Models/salon/Estructura.obj");
+	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -286,6 +287,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSalon));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		salon.Draw(lightingShader);
+
 		// Sillas
 		glm::mat4 modelSilla(1);
 		for (size_t i = 0; i < 31; i++)
@@ -299,13 +301,22 @@ int main()
 				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSilla));
 				glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 				if (sillas[i].sillaNueva) {
-					sillaNueva.Draw(lightingShader);
+					//sillaNueva.Draw(lightingShader);
 				}
 				else {
-					sillaVieja.Draw(lightingShader);
+					//sillaVieja.Draw(lightingShader);
 				}
 			}
 		}
+
+
+		// Proyector
+		glm::mat4 modelProyector(1);
+		modelProyector = glm::mat4(1);
+		modelProyector = glm::rotate(modelProyector, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelProyector = glm::scale(modelProyector, glm::vec3(2.0f, 2.0f, 2.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
+		proyector.Draw(lightingShader);
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -323,6 +334,7 @@ int main()
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
 		// Draw the light object (using light's vertex attributes)
 		model = glm::mat4(1);
 		model = glm::translate(model, pointLightPositions[0]);
@@ -530,7 +542,7 @@ void inicializarSillas()
 		sillas[i].posicionActual = posSillas[i];
 		sillas[i].anguloActual = anguloSillas[i];
 		sillas[i].anguloFinal = anguloSillas[i];
-		sillas[i].scale = glm::vec3(3.0f, 3.5f, 3.0f);
+		sillas[i].scale = glm::vec3(0.5f, 0.6f, 0.5f);
 		sillas[i].estadoAnimacion = estadoAnimacion[i];
 		sillas[i].dibujar = true;
 		sillas[i].sillaNueva = false;
