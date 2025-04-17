@@ -431,7 +431,7 @@ void reiniciar()
 void inicializarSillas()
 {
 	float posSillasY = 0.4;
-	float posSillasX19_30 = 33.0f;
+	float posSillasX19_30 = 33.5f;
 	glm::vec3 posSillas[] = {
 		// silla profesor
 		glm::vec3(6.6f, posSillasY, -22.1f),
@@ -811,7 +811,7 @@ void animacionSilla() {
 			break;
 		case 14: // Mover sillas 0-30 sobre x2
 			sillas[i].posicionActual.z -= pasoPosicion;
-			if (sillas[i].posicionActual.z > z3)
+			if (sillas[i].posicionActual.z < z3)
 			{
 				sillas[i].dibujar = true;
 			}
