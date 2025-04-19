@@ -112,7 +112,7 @@ struct KeyFrameProyector {
 	float incRotY;
 };
 
-// Proyector
+// Proyector =============================///
 // Posiciones para que haga el recorrido de salida
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
 	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
@@ -122,17 +122,32 @@ KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
 	{ 12.0f, 2.0f, 15.0f, 0.0f },
 };
 
-
-
 int FrameIndexProyector = 5;
 int PlayIndexProyector = 0;
 bool playProyector = false;
 
 float proyectorPosX = 6.0f, proyectorPosY = 5.0f, proyectorPosZ = -11.0f;
 float proyectorRotY = 0.0f;
-// ======================================
+// ======================================///
 
 
+// Pizarron =============================---
+// Posiciones para que haga el recorrido de salida
+float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
+float pizarronRotY = 0.0f;
+
+bool animarPizarron = false;
+int pizarronIndex = 0;
+int pizarronSteps = 0;
+int pizarronMaxSteps = 180;
+
+struct KeyFramePizarron {
+	float x, y, z, rotY;
+	float incX, incY, incZ, incRotY;
+};
+
+KeyFramePizarron pizarronKF[2]; // solo ida y regreso
+// ======================================---
 
 
 // estructura modelo silla
@@ -240,7 +255,9 @@ int main()
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 	Model salon((char*)"Models/salon/Estructura.obj");
+	// Para keyframes
 	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
+	Model pizarron((char*)"Models/pizarronNuevo/pizzaron.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -381,14 +398,25 @@ int main()
 
 
 		// Proyector animado con KeyFrames
-		glm::mat4 modelProyector(1);
-		modelProyector = glm::mat4(1);
-		modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
-		modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
-		modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
+		if (playProyector || PlayIndexProyector < FrameIndexProyector - 1) {
+			glm::mat4 modelProyector(1);
+			modelProyector = glm::mat4(1);
+			modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
+			modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
+			modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
+			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			proyector.Draw(lightingShader);
+		}
+
+		glm::mat4 modelpizarron(1);
+		modelpizarron = glm::mat4(1);
+		//modelpizarron = glm::scale(modelpizarron, glm::vec3(1.0f));
+		modelpizarron = glm::translate(modelpizarron, glm::vec3(2.0f, 3.0f, -23.0f));
+		modelpizarron = glm::rotate(modelpizarron, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelpizarron));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
-		proyector.Draw(lightingShader);
+		pizarron.Draw(lightingShader);
 
 
 		// Also draw the lamp object, again binding the appropriate shader
