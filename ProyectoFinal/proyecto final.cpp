@@ -139,11 +139,11 @@ struct KeyFramePizarron {
 };
 
 KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
-	{ 12.0f, 2.0f, 15.0f, 0.0f },  // Donde desaparece proyector
-	{ 10.0f, 3.0f, 10.0f, 0.0f },
-	{ 6.0f, 3.5f, 5.0f, 0.0f },
-	{ 3.0f, 3.2f, -10.0f, 0.0f },
-	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Destino final
+	{ 22.0f, 2.0f, 15.0f, 0.0f },  // Inicio
+	{ 22.0f, 2.0f, -10.0f, 0.0f },  // entra al salon
+	{ 22.0f, 3.0f, -10.0f, 0.0f },	// toma altura
+	{ 22.0f, 3.0f, -23.0f, 0.0f },
+	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Fin
 };
 bool mostrarPizarron = false;
 int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
@@ -228,34 +228,20 @@ void animarProyector() {
 			if (PlayIndexProyector >= FrameIndexProyector - 1) {
 				playProyector = false;
 
-				// 🔽 Aquí inicia la animación del pizarrón
+				// ✅ Inicia la animación del pizarrón usando los keyframes definidos en pizKF[]
 				animarPizarron = true;
-				mostrarPizarron = true;  // ✅ Se mantiene visible tras animarse
+				mostrarPizarron = true;
 				pasosPizarron = 0;
+				PlayIndexPizarron = 0;
 
-				// Frame inicial = donde terminó el proyector
-				pizKF[0].x = proyectorPosX;
-				pizKF[0].y = proyectorPosY;
-				pizKF[0].z = proyectorPosZ;
-				pizKF[0].rotY = proyectorRotY;
-
-				// Frame final = la posición a donde se mueve el pizarrón
-				pizKF[1].x = 2.0f;
-				pizKF[1].y = 3.0f;
-				pizKF[1].z = -23.0f;
-				pizKF[1].rotY = 0.0f;
-
-				// Diferencias por paso
-				pizKF[0].incX = (pizKF[1].x - pizKF[0].x) / maxPasosPizarron;
-				pizKF[0].incY = (pizKF[1].y - pizKF[0].y) / maxPasosPizarron;
-				pizKF[0].incZ = (pizKF[1].z - pizKF[0].z) / maxPasosPizarron;
-				pizKF[0].incRotY = (pizKF[1].rotY - pizKF[0].rotY) / maxPasosPizarron;
-
-				// Posición inicial del pizarrón
+				// Posición inicial del pizarrón (primer keyframe)
 				pizarronPosX = pizKF[0].x;
 				pizarronPosY = pizKF[0].y;
 				pizarronPosZ = pizKF[0].z;
 				pizarronRotY = pizKF[0].rotY;
+
+				// Interpolación hacia el siguiente keyframe
+				interpolarPizarron();
 			}
 			else {
 				i_curr_steps = 0;
@@ -271,6 +257,7 @@ void animarProyector() {
 		}
 	}
 }
+
 
 
 
@@ -464,10 +451,10 @@ int main()
 				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSilla));
 				glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 				if (sillas[i].sillaNueva) {
-					//sillaNueva.Draw(lightingShader);
+					sillaNueva.Draw(lightingShader);
 				}
 				else {
-					//sillaVieja.Draw(lightingShader);
+					sillaVieja.Draw(lightingShader);
 				}
 			}
 		}
@@ -485,11 +472,12 @@ int main()
 			proyector.Draw(lightingShader);
 		}
 		if (animarPizarron || mostrarPizarron) {
-			glm::mat4 modelPiz(1.0f);
+			glm::mat4 modelPiz(1);
+			modelPiz = glm::mat4(1);
 			modelPiz = glm::translate(modelPiz, glm::vec3(pizarronPosX, pizarronPosY, pizarronPosZ));
 			modelPiz = glm::rotate(modelPiz, glm::radians(pizarronRotY), glm::vec3(0.0f, 1.0f, 0.0f));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPiz));
-			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			pizarron.Draw(lightingShader);
 		}
 
@@ -638,6 +626,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			pizarronPosZ = pizKF[0].z;
 			pizarronRotY = pizKF[0].rotY;
 		}
+	}
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		std::cout << "📌 Posición actual del pizarrón:\n";
+		std::cout << "X = " << pizarronPosX << ", Y = " << pizarronPosY << ", Z = " << pizarronPosZ << std::endl;
+		std::cout << "RotY = " << pizarronRotY << std::endl;
 	}
 
 
