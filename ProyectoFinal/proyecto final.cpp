@@ -293,7 +293,7 @@ int main()
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		salon.Draw(lightingShader);
 		// Sillas
-		/*glm::mat4 modelSilla(1);
+		glm::mat4 modelSilla(1);
 		for (size_t i = 0; i < 31; i++)
 		{
 			if (sillas[i].dibujar)
@@ -311,7 +311,7 @@ int main()
 					sillaVieja.Draw(lightingShader);
 				}
 			}
-		}*/
+		}
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -451,15 +451,15 @@ void controlCamara()
 	float y = 8.0f;
 	glm::vec3 centro = glm::vec3(18.5f, 0.0f, -22.0f);
 
-	// Calcular nueva posición
+	// Calcular nueva posiciÃ³n
 	float x = (cos(ciclo) * radioMenor) + centro.x;
 	float z = (sin(ciclo) * radioMayor) + centro.z;
 	glm::vec3 newPosition = glm::vec3(x, y, z);
 
-	// Establecer nueva posición
+	// Establecer nueva posiciÃ³n
 	camera.SetPosition(newPosition);
 
-	// Calcular y establecer la dirección hacia el centro
+	// Calcular y establecer la direcciÃ³n hacia el centro
 	glm::vec3 newFront = glm::normalize(centro - newPosition);
 	camera.SetFront(newFront);
 }
