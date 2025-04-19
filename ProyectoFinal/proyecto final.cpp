@@ -29,6 +29,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 void MouseCallback(GLFWwindow *window, double xPos, double yPos);
 void reiniciar();
 void DoMovement();
+void animacion();
 void animacionSilla();
 
 // Window dimensions
@@ -100,6 +101,9 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(0);
 
+// Control de animacion
+bool animacionActiva = false;
+
 // estructura modelo silla
 struct Silla
 {
@@ -112,8 +116,8 @@ struct Silla
 	bool dibujar;
 	bool sillaNueva;
 };
+
 //Animacion sillas
-bool estadoAnimacionSillas = false;
 Silla sillas[31];
 
 // Deltatime
@@ -209,7 +213,7 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
-		animacionSilla();
+		animacion();
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -409,9 +413,9 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 	if (key == GLFW_KEY_N)
 	{
-		if (!estadoAnimacionSillas)
+		if (!animacionActiva)
 		{
-			estadoAnimacionSillas = true;
+			animacionActiva = true;
 		}
 	}
 	if (key == GLFW_KEY_R)
@@ -423,8 +427,15 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 // Reiniciar la simulacion
 void reiniciar()
 {
-	estadoAnimacionSillas = false;
+	animacionActiva = false;
 	inicializarSillas();
+}
+
+// Control general de animacion
+void animacion() 
+{
+	if (!animacionActiva) return;
+	animacionSilla();
 }
 
 // Inicializa las sillas
@@ -539,7 +550,6 @@ void inicializarSillas()
 
 // Animaciones
 void animacionSilla() {
-	if (!estadoAnimacionSillas) return;
 	// Limites de las sillas
 	float x1 = 3.5f;
 	float x2 = 21.0f;
