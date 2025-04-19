@@ -29,6 +29,8 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 void MouseCallback(GLFWwindow *window, double xPos, double yPos);
 void reiniciar();
 void DoMovement();
+void animacion();
+void controlCamara();
 void animacionSilla();
 
 // Window dimensions
@@ -100,6 +102,9 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(0);
 
+// Control de animacion
+bool animacionActiva = false;
+
 // estructura modelo silla
 struct Silla
 {
@@ -112,11 +117,12 @@ struct Silla
 	bool dibujar;
 	bool sillaNueva;
 };
+
 //Animacion sillas
-bool estadoAnimacionSillas = false;
 Silla sillas[31];
 
 // Deltatime
+GLfloat currentFrame = glfwGetTime();
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
@@ -202,14 +208,14 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Calculate deltatime of current frame
-		GLfloat currentFrame = glfwGetTime();
+		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
-		animacionSilla();
+		animacion();
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -287,7 +293,7 @@ int main()
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		salon.Draw(lightingShader);
 		// Sillas
-		glm::mat4 modelSilla(1);
+		/*glm::mat4 modelSilla(1);
 		for (size_t i = 0; i < 31; i++)
 		{
 			if (sillas[i].dibujar)
@@ -305,7 +311,7 @@ int main()
 					sillaVieja.Draw(lightingShader);
 				}
 			}
-		}
+		}*/
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -392,6 +398,7 @@ void DoMovement()
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
+	if (animacionActiva) return;
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -409,9 +416,9 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 	if (key == GLFW_KEY_N)
 	{
-		if (!estadoAnimacionSillas)
+		if (!animacionActiva)
 		{
-			estadoAnimacionSillas = true;
+			animacionActiva = true;
 		}
 	}
 	if (key == GLFW_KEY_R)
@@ -423,8 +430,38 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 // Reiniciar la simulacion
 void reiniciar()
 {
-	estadoAnimacionSillas = false;
+	animacionActiva = false;
 	inicializarSillas();
+}
+
+// Control general de animacion
+void animacion() 
+{
+	if (!animacionActiva) return;
+	animacionSilla();
+	controlCamara();
+}
+
+// Control de la camara
+void controlCamara()
+{
+	float ciclo = fmod(currentFrame, 1500.0f);
+	float radioMayor = 19.0;
+	float radioMenor = 16.0f;
+	float y = 8.0f;
+	glm::vec3 centro = glm::vec3(18.5f, 0.0f, -22.0f);
+
+	// Calcular nueva posición
+	float x = (cos(ciclo) * radioMenor) + centro.x;
+	float z = (sin(ciclo) * radioMayor) + centro.z;
+	glm::vec3 newPosition = glm::vec3(x, y, z);
+
+	// Establecer nueva posición
+	camera.SetPosition(newPosition);
+
+	// Calcular y establecer la dirección hacia el centro
+	glm::vec3 newFront = glm::normalize(centro - newPosition);
+	camera.SetFront(newFront);
 }
 
 // Inicializa las sillas
@@ -539,7 +576,6 @@ void inicializarSillas()
 
 // Animaciones
 void animacionSilla() {
-	if (!estadoAnimacionSillas) return;
 	// Limites de las sillas
 	float x1 = 3.5f;
 	float x2 = 21.0f;
@@ -1047,6 +1083,7 @@ void animacionSilla() {
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
+	if (animacionActiva) return;
 	if (firstMouse)
 	{
 		lastX = xPos;

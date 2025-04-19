@@ -109,6 +109,21 @@ public:
 		this->updateCameraVectors();
 	}
 
+	// Asignar nueva posicion de la camara
+	void SetPosition(glm::vec3 newPosition) 
+	{
+		this->position = newPosition;
+	}
+	
+	// Asignar direccion de la calara
+	void SetFront(glm::vec3 newFront)
+	{
+		this->front = glm::normalize(newFront);
+		// Actualizar los vectores right y up
+		this->right = glm::normalize(glm::cross(this->front, this->worldUp));
+		this->up = glm::normalize(glm::cross(this->right, this->front));
+	}
+
 	// Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void ProcessMouseScroll(GLfloat yOffset)
 	{
