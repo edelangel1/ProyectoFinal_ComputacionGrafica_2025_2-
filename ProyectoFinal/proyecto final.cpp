@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <cmath>
 
 // GLEW
@@ -25,8 +25,8 @@
 
 // Function prototypes
 void inicializarSillas();
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow *window, double xPos, double yPos);
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void reiniciar();
 void DoMovement();
 void animacionSilla();
@@ -115,10 +115,10 @@ struct KeyFrameProyector {
 // Proyector =============================///
 // Posiciones para que haga el recorrido de salida
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
-	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posici�n inicial
+	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
 	{ 6.0f, 5.0f, 0.0f, 0.0f },    // avanza en Z
 	{ 12.0f, 5.0f, 0.0f, 0.0f },     // gira para estar altura de entrada
-	{ 12.0f, 2.0f, 0.0f, 0.0f },   
+	{ 12.0f, 2.0f, 0.0f, 0.0f },
 	{ 12.0f, 2.0f, 15.0f, 0.0f },
 };
 
@@ -130,24 +130,67 @@ float proyectorPosX = 6.0f, proyectorPosY = 5.0f, proyectorPosZ = -11.0f;
 float proyectorRotY = 0.0f;
 // ======================================///
 
-
-// Pizarron =============================---
-// Posiciones para que haga el recorrido de salida
-float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
-float pizarronRotY = 0.0f;
-
-bool animarPizarron = false;
-int pizarronIndex = 0;
-int pizarronSteps = 0;
-int pizarronMaxSteps = 180;
+// PIZARRÓN CON MULTI-KEYFRAMES ==============================
+const int MAX_FRAMES_PIZARRON = 5;
 
 struct KeyFramePizarron {
 	float x, y, z, rotY;
 	float incX, incY, incZ, incRotY;
 };
 
-KeyFramePizarron pizarronKF[2]; // solo ida y regreso
-// ======================================---
+KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
+	{ 12.0f, 2.0f, 15.0f, 0.0f },  // Donde desaparece proyector
+	{ 10.0f, 3.0f, 10.0f, 0.0f },
+	{ 6.0f, 3.5f, 5.0f, 0.0f },
+	{ 3.0f, 3.2f, -10.0f, 0.0f },
+	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Destino final
+};
+bool mostrarPizarron = false;
+int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
+int PlayIndexPizarron = 0;
+int pasosPizarron = 0;
+int maxPasosPizarron = 90;
+bool animarPizarron = false;
+
+float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
+float pizarronRotY = 0.0f;
+// ======================================///
+
+void interpolarPizarron() {
+	pizKF[PlayIndexPizarron].incX = (pizKF[PlayIndexPizarron + 1].x - pizKF[PlayIndexPizarron].x) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incY = (pizKF[PlayIndexPizarron + 1].y - pizKF[PlayIndexPizarron].y) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incZ = (pizKF[PlayIndexPizarron + 1].z - pizKF[PlayIndexPizarron].z) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incRotY = (pizKF[PlayIndexPizarron + 1].rotY - pizKF[PlayIndexPizarron].rotY) / maxPasosPizarron;
+
+	pizarronPosX = pizKF[PlayIndexPizarron].x;
+	pizarronPosY = pizKF[PlayIndexPizarron].y;
+	pizarronPosZ = pizKF[PlayIndexPizarron].z;
+	pizarronRotY = pizKF[PlayIndexPizarron].rotY;
+}
+
+void animarPizarronmov() {
+	if (animarPizarron) {
+		if (pasosPizarron >= maxPasosPizarron) {
+			PlayIndexPizarron++;
+			if (PlayIndexPizarron >= FrameIndexPizarron - 1) {
+				animarPizarron = false;
+			}
+			else {
+				pasosPizarron = 0;
+				interpolarPizarron();
+			}
+		}
+		else {
+			pizarronPosX += pizKF[PlayIndexPizarron].incX;
+			pizarronPosY += pizKF[PlayIndexPizarron].incY;
+			pizarronPosZ += pizKF[PlayIndexPizarron].incZ;
+			pizarronRotY += pizKF[PlayIndexPizarron].incRotY;
+			pasosPizarron++;
+		}
+	}
+}
+
+
 
 
 // estructura modelo silla
@@ -178,13 +221,41 @@ void interpolarProyector() {
 	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
 	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
 }
-
 void animarProyector() {
 	if (playProyector) {
 		if (i_curr_steps >= i_max_steps) {
 			PlayIndexProyector++;
 			if (PlayIndexProyector >= FrameIndexProyector - 1) {
 				playProyector = false;
+
+				// 🔽 Aquí inicia la animación del pizarrón
+				animarPizarron = true;
+				mostrarPizarron = true;  // ✅ Se mantiene visible tras animarse
+				pasosPizarron = 0;
+
+				// Frame inicial = donde terminó el proyector
+				pizKF[0].x = proyectorPosX;
+				pizKF[0].y = proyectorPosY;
+				pizKF[0].z = proyectorPosZ;
+				pizKF[0].rotY = proyectorRotY;
+
+				// Frame final = la posición a donde se mueve el pizarrón
+				pizKF[1].x = 2.0f;
+				pizKF[1].y = 3.0f;
+				pizKF[1].z = -23.0f;
+				pizKF[1].rotY = 0.0f;
+
+				// Diferencias por paso
+				pizKF[0].incX = (pizKF[1].x - pizKF[0].x) / maxPasosPizarron;
+				pizKF[0].incY = (pizKF[1].y - pizKF[0].y) / maxPasosPizarron;
+				pizKF[0].incZ = (pizKF[1].z - pizKF[0].z) / maxPasosPizarron;
+				pizKF[0].incRotY = (pizKF[1].rotY - pizKF[0].rotY) / maxPasosPizarron;
+
+				// Posición inicial del pizarrón
+				pizarronPosX = pizKF[0].x;
+				pizarronPosY = pizKF[0].y;
+				pizarronPosZ = pizKF[0].z;
+				pizarronRotY = pizKF[0].rotY;
 			}
 			else {
 				i_curr_steps = 0;
@@ -200,6 +271,9 @@ void animarProyector() {
 		}
 	}
 }
+
+
+
 
 
 
@@ -250,7 +324,7 @@ int main()
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
-	
+
 	// Models
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
@@ -297,19 +371,21 @@ int main()
 		DoMovement();
 		animacionSilla();
 		animarProyector();
+		animarPizarronmov();
+
 
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	   
+
 		// OpenGL options
 		glEnable(GL_DEPTH_TEST);
 
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
 
-        glUniform1i(glGetUniformLocation(lightingShader.Program, "diffuse"), 0);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "diffuse"), 0);
 		//glUniform1i(glGetUniformLocation(lightingShader.Program, "specular"),1);
 
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
@@ -317,23 +393,23 @@ int main()
 
 		// Directional light
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"),0.6f,0.6f,0.6f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"),0.3f, 0.3f, 0.3f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
 
 		// Point light 1
-	    glm::vec3 lightColor;
-		lightColor.x= abs(sin(glfwGetTime() *Light1.x));
-		lightColor.y= abs(sin(glfwGetTime() *Light1.y));
-		lightColor.z= sin(glfwGetTime() *Light1.z);
-		
+		glm::vec3 lightColor;
+		lightColor.x = abs(sin(glfwGetTime() * Light1.x));
+		lightColor.y = abs(sin(glfwGetTime() * Light1.y));
+		lightColor.z = sin(glfwGetTime() * Light1.z);
+
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x,lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x,lightColor.y,lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x, lightColor.y, lightColor.z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.2f, 0.2f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"),0.075f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
 
 		// SpotLight
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
@@ -363,8 +439,8 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        view = camera.GetViewMatrix();	
-		
+		view = camera.GetViewMatrix();
+
 		// Carga de modelo 
 		// Salon
 		glm::mat4 modelSalon(1);
@@ -408,15 +484,24 @@ int main()
 			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			proyector.Draw(lightingShader);
 		}
+		if (animarPizarron || mostrarPizarron) {
+			glm::mat4 modelPiz(1.0f);
+			modelPiz = glm::translate(modelPiz, glm::vec3(pizarronPosX, pizarronPosY, pizarronPosZ));
+			modelPiz = glm::rotate(modelPiz, glm::radians(pizarronRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPiz));
+			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			pizarron.Draw(lightingShader);
+		}
 
-		glm::mat4 modelpizarron(1);
-		modelpizarron = glm::mat4(1);
-		//modelpizarron = glm::scale(modelpizarron, glm::vec3(1.0f));
-		modelpizarron = glm::translate(modelpizarron, glm::vec3(2.0f, 3.0f, -23.0f));
-		modelpizarron = glm::rotate(modelpizarron, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelpizarron));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
-		pizarron.Draw(lightingShader);
+
+		//glm::mat4 modelpizarron(1);
+		//modelpizarron = glm::mat4(1);
+		////modelpizarron = glm::scale(modelpizarron, glm::vec3(1.0f));
+		//modelpizarron = glm::translate(modelpizarron, glm::vec3(2.0f, 3.0f, -23.0f));
+		//modelpizarron = glm::rotate(modelpizarron, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelpizarron));
+		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		//pizarron.Draw(lightingShader);
 
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -443,7 +528,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
+
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
@@ -503,7 +588,7 @@ void DoMovement()
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -533,6 +618,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
 		if (!playProyector && FrameIndexProyector > 1) {
+			// Reiniciar animación del proyector
 			PlayIndexProyector = 0;
 			i_curr_steps = 0;
 			proyectorPosX = ProyectorKF[0].posX;
@@ -541,15 +627,21 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			proyectorRotY = ProyectorKF[0].rotY;
 			interpolarProyector();
 			playProyector = true;
+
+			// Reiniciar animación y visibilidad del pizarrón
+			animarPizarron = false;
+			mostrarPizarron = false; // ← esto hace que desaparezca hasta que vuelva a animarse
+			pasosPizarron = 0;
+			PlayIndexPizarron = 0;
+			pizarronPosX = pizKF[0].x;
+			pizarronPosY = pizKF[0].y;
+			pizarronPosZ = pizKF[0].z;
+			pizarronRotY = pizKF[0].rotY;
 		}
 	}
-	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-		std::cout << "Pos actual Proyector: "
-			<< "X=" << proyectorPosX
-			<< " Y=" << proyectorPosY
-			<< " Z=" << proyectorPosZ
-			<< " rotY=" << proyectorRotY << std::endl;
-	}
+
+
+
 
 }
 
@@ -686,14 +778,14 @@ void animacionSilla() {
 	// Cambios de posicion y rotacion
 	float pasoPosicion = 0.03f;
 	float pasoRotacion = 90 / ceil(distGiro / pasoPosicion);
-	
+
 	for (size_t i = 0; i < 31; i++)
 	{
 		switch (sillas[i].estadoAnimacion)
 		{
 		case 1: // Mover silla 0 a x1
-			if (sillas[i].posicionActual.x > x1) 
-			{ 
+			if (sillas[i].posicionActual.x > x1)
+			{
 				sillas[i].posicionActual.x -= pasoPosicion;
 			}
 			else
@@ -711,9 +803,9 @@ void animacionSilla() {
 					sillas[i].anguloActual = 90;
 				}
 			}
-			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x1) 
-			{ 
-				sillas[i].estadoAnimacion = 2; 
+			if (sillas[i].anguloActual == 90 && sillas[i].posicionActual.x == x1)
+			{
+				sillas[i].estadoAnimacion = 2;
 			}
 			break;
 		case 2: // Mover silla 0 a z1
@@ -1169,7 +1261,7 @@ void animacionSilla() {
 	}
 }
 
-void MouseCallback(GLFWwindow *window, double xPos, double yPos)
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
