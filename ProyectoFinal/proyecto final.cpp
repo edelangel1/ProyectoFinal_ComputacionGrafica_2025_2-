@@ -112,14 +112,17 @@ struct KeyFrameProyector {
 	float incRotY;
 };
 
+// Proyector
+// Posiciones para que haga el recorrido de salida
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
-	{ 6.0f, 5.0f, -11.0f, 0.0f },    // Posición inicial
-	{ 6.0f, 5.0f, -11.0f, 0.0f },
-	{ 6.0f, 5.0f, 30.0f, 0.0f },
-	//{ 10.0f, 1.8f, -25.0f, 0.0f },
-	//{ 15.0f, 1.8f, -25.0f, 0.0f },
-	{}, {}, {}, {} // vacíos
+	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
+	{ 6.0f, 5.0f, 0.0f, 0.0f },    // avanza en Z
+	{ 12.0f, 5.0f, 0.0f, 0.0f },     // gira para estar altura de entrada
+	{ 12.0f, 2.0f, 0.0f, 0.0f },   
+	{ 12.0f, 2.0f, 15.0f, 0.0f },
 };
+
+
 
 int FrameIndexProyector = 5;
 int PlayIndexProyector = 0;
@@ -511,6 +514,13 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			interpolarProyector();
 			playProyector = true;
 		}
+	}
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		std::cout << "Pos actual Proyector: "
+			<< "X=" << proyectorPosX
+			<< " Y=" << proyectorPosY
+			<< " Z=" << proyectorPosZ
+			<< " rotY=" << proyectorRotY << std::endl;
 	}
 
 }
