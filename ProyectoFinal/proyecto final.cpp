@@ -1038,6 +1038,7 @@ void animacionSilla() {
 			{
 				sillas[i].estadoAnimacion = 18;
 			}
+			break;
 		default:
 			break;
 		}
