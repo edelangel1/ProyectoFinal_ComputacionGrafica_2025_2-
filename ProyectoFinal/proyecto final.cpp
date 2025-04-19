@@ -1033,9 +1033,9 @@ void animacionSilla() {
 			{
 				sillas[i].posicionActual.z -= pasoPosicion;
 			}
-			if (abs(sillas[i].posicionActual.z - sillas[i].posicionFinal.z) <= distGiro)
+			if ((sillas[i].anguloActual != sillas[i].anguloFinal) && (abs(sillas[i].posicionActual.z - sillas[i].posicionFinal.z) <= distGiro))
 			{
-				if (sillas[i].anguloActual < sillas[i].anguloFinal)
+				if (sillas[i].anguloActual < (sillas[i].anguloFinal + 360))
 				{
 					sillas[i].anguloActual += pasoRotacion;
 				}
