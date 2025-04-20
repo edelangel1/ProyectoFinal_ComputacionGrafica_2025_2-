@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <cmath>
+#include <algorithm>
 
 // GLEW
 #include <GL/glew.h>
@@ -39,6 +40,7 @@ int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
 Camera  camera(glm::vec3(20.0f, 10.0f, -22.0f));
+float contadorCamara = 0.0;
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -103,7 +105,10 @@ float vertices[] = {
 glm::vec3 Light1 = glm::vec3(0);
 
 // Control de animacion
-bool animacionActiva = false;
+bool animacionActiva[] = {
+	false, // estado general de las animaciones
+	false // estado animacion sillas
+};
 
 // ============ Keyframes ==============
 #define MAX_FRAMES 9
@@ -214,7 +219,6 @@ struct Silla
 Silla sillas[31];
 
 // Deltatime
-GLfloat currentFrame = glfwGetTime();
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
@@ -321,7 +325,6 @@ int main()
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 	Model salon((char*)"Models/salon/Estructura.obj");
-	// Para keyframes
 	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
 	Model pizarron((char*)"Models/pizarronNuevo/pizzaron.obj");
 
@@ -354,16 +357,14 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Calculate deltatime of current frame
-		currentFrame = glfwGetTime();
+		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
-
 		animacion();
-		animacionSilla();
 		animarProyector();
 		animarPizarronmov();
 
@@ -552,38 +553,11 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
-	if (keys[GLFW_KEY_T])
-	{
-		pointLightPositions[0].x += 0.01f;
-	}
-	if (keys[GLFW_KEY_G])
-	{
-		pointLightPositions[0].x -= 0.01f;
-	}
-
-	if (keys[GLFW_KEY_Y])
-	{
-		pointLightPositions[0].y += 0.01f;
-	}
-
-	if (keys[GLFW_KEY_H])
-	{
-		pointLightPositions[0].y -= 0.01f;
-	}
-	if (keys[GLFW_KEY_U])
-	{
-		pointLightPositions[0].z -= 0.1f;
-	}
-	if (keys[GLFW_KEY_J])
-	{
-		pointLightPositions[0].z += 0.01f;
-	}
 }
 
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (animacionActiva) return;
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -599,16 +573,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			keys[key] = false;
 		}
 	}
-	if (key == GLFW_KEY_N)
-	{
-		if (!animacionActiva)
-		{
-			animacionActiva = true;
-		}
-	}
 	if (key == GLFW_KEY_R)
 	{
 		reiniciar();
+	}
+	if (key == GLFW_KEY_N)
+	{
+		if (!animacionActiva[0])
+		{
+			std::fill(std::begin(animacionActiva), std::end(animacionActiva), true);
+		}
 	}
 	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
 		if (!playProyector && FrameIndexProyector > 1) {
@@ -647,30 +621,41 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 // Reiniciar la simulacion
 void reiniciar()
 {
-	animacionActiva = false;
+	std::fill(std::begin(animacionActiva), std::end(animacionActiva), false);
 	inicializarSillas();
 }
 
 // Control general de animacion
 void animacion()
 {
-	if (!animacionActiva) return;
-	animacionSilla();
+	// Validar que la animacion este activa
+	if (!animacionActiva[0]) return; 
+	// Mover la camara
 	controlCamara();
+	// Si todavia no termina la animacion de sillas llama a la funcion
+	if (animacionActiva[1])
+	{
+		animacionSilla();
+	}
+
+	// Verificar si ya terminaron todas las animaciones
+	if (std::all_of(std::begin(animacionActiva) + 1, std::end(animacionActiva), [](bool v) { return !v; }))
+	{
+		animacionActiva[0] = false;
+	}
 }
 
 // Control de la camara
 void controlCamara()
 {
-	float ciclo = fmod(currentFrame, 1500.0f);
 	float radioMayor = 19.0;
 	float radioMenor = 16.0f;
 	float y = 8.0f;
-	glm::vec3 centro = glm::vec3(18.5f, 0.0f, -22.0f);
+	glm::vec3 centro = glm::vec3(18.5f, 5.0f, -22.0f);
 
 	// Calcular nueva posición
-	float x = (cos(ciclo) * radioMenor) + centro.x;
-	float z = (sin(ciclo) * radioMayor) + centro.z;
+	float x = (cos(contadorCamara) * radioMenor) + centro.x;
+	float z = (sin(contadorCamara) * radioMayor) + centro.z;
 	glm::vec3 newPosition = glm::vec3(x, y, z);
 
 	// Establecer nueva posición
@@ -679,6 +664,8 @@ void controlCamara()
 	// Calcular y establecer la dirección hacia el centro
 	glm::vec3 newFront = glm::normalize(centro - newPosition);
 	camera.SetFront(newFront);
+
+	contadorCamara += 1.7E-3;
 }
 
 // Inicializa las sillas
@@ -1292,6 +1279,12 @@ void animacionSilla() {
 				sillas[i].estadoAnimacion = 18;
 			}
 			break;
+		case 21:
+			if (i == 30)
+			{
+				animacionActiva[1] = false;
+			}
+			break;
 		default:
 			break;
 		}
@@ -1300,7 +1293,7 @@ void animacionSilla() {
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
-	if (animacionActiva) return;
+	if (animacionActiva[0]) return;
 	if (firstMouse)
 	{
 		lastX = xPos;
