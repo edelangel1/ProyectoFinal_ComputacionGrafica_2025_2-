@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <cmath>
 
 // GLEW
@@ -105,6 +105,98 @@ glm::vec3 Light1 = glm::vec3(0);
 // Control de animacion
 bool animacionActiva = false;
 
+// ============ Keyframes ==============
+#define MAX_FRAMES 9
+int i_max_steps = 190;
+int i_curr_steps = 0;
+
+struct KeyFrameProyector {
+	float posX, posY, posZ;
+	float rotY;
+	float incX, incY, incZ;
+	float incRotY;
+};
+
+// Proyector =============================///
+// Posiciones para que haga el recorrido de salida
+KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
+	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
+	{ 6.0f, 5.0f, 0.0f, 0.0f },    // avanza en Z
+	{ 12.0f, 5.0f, 0.0f, 0.0f },     // gira para estar altura de entrada
+	{ 12.0f, 2.0f, 0.0f, 0.0f },
+	{ 12.0f, 2.0f, 15.0f, 0.0f },
+};
+
+int FrameIndexProyector = 5;
+int PlayIndexProyector = 0;
+bool playProyector = false;
+
+float proyectorPosX = 6.0f, proyectorPosY = 5.0f, proyectorPosZ = -11.0f;
+float proyectorRotY = 0.0f;
+// ======================================///
+
+// PIZARRÓN CON MULTI-KEYFRAMES ==============================
+const int MAX_FRAMES_PIZARRON = 5;
+
+struct KeyFramePizarron {
+	float x, y, z, rotY;
+	float incX, incY, incZ, incRotY;
+};
+
+KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
+	{ 22.0f, 2.0f, 15.0f, 0.0f },  // Inicio
+	{ 22.0f, 2.0f, -10.0f, 0.0f },  // entra al salon
+	{ 22.0f, 3.0f, -10.0f, 0.0f },	// toma altura
+	{ 22.0f, 3.0f, -23.0f, 0.0f },
+	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Fin
+};
+bool mostrarPizarron = false;
+int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
+int PlayIndexPizarron = 0;
+int pasosPizarron = 0;
+int maxPasosPizarron = 90;
+bool animarPizarron = false;
+
+float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
+float pizarronRotY = 0.0f;
+// ======================================///
+
+void interpolarPizarron() {
+	pizKF[PlayIndexPizarron].incX = (pizKF[PlayIndexPizarron + 1].x - pizKF[PlayIndexPizarron].x) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incY = (pizKF[PlayIndexPizarron + 1].y - pizKF[PlayIndexPizarron].y) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incZ = (pizKF[PlayIndexPizarron + 1].z - pizKF[PlayIndexPizarron].z) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incRotY = (pizKF[PlayIndexPizarron + 1].rotY - pizKF[PlayIndexPizarron].rotY) / maxPasosPizarron;
+
+	pizarronPosX = pizKF[PlayIndexPizarron].x;
+	pizarronPosY = pizKF[PlayIndexPizarron].y;
+	pizarronPosZ = pizKF[PlayIndexPizarron].z;
+	pizarronRotY = pizKF[PlayIndexPizarron].rotY;
+}
+
+void animarPizarronmov() {
+	if (animarPizarron) {
+		if (pasosPizarron >= maxPasosPizarron) {
+			PlayIndexPizarron++;
+			if (PlayIndexPizarron >= FrameIndexPizarron - 1) {
+				animarPizarron = false;
+			}
+			else {
+				pasosPizarron = 0;
+				interpolarPizarron();
+			}
+		}
+		else {
+			pizarronPosX += pizKF[PlayIndexPizarron].incX;
+			pizarronPosY += pizKF[PlayIndexPizarron].incY;
+			pizarronPosZ += pizKF[PlayIndexPizarron].incZ;
+			pizarronRotY += pizKF[PlayIndexPizarron].incRotY;
+			pasosPizarron++;
+		}
+	}
+}
+
+
+
 // estructura modelo silla
 struct Silla
 {
@@ -125,6 +217,57 @@ Silla sillas[31];
 GLfloat currentFrame = glfwGetTime();
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
+
+
+// ======== Funciones para Keyframes ===============
+void interpolarProyector() {
+	ProyectorKF[PlayIndexProyector].incX = (ProyectorKF[PlayIndexProyector + 1].posX - ProyectorKF[PlayIndexProyector].posX) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incY = (ProyectorKF[PlayIndexProyector + 1].posY - ProyectorKF[PlayIndexProyector].posY) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
+}
+void animarProyector() {
+	if (playProyector) {
+		if (i_curr_steps >= i_max_steps) {
+			PlayIndexProyector++;
+			if (PlayIndexProyector >= FrameIndexProyector - 1) {
+				playProyector = false;
+
+				// ✅ Inicia la animación del pizarrón usando los keyframes definidos en pizKF[]
+				animarPizarron = true;
+				mostrarPizarron = true;
+				pasosPizarron = 0;
+				PlayIndexPizarron = 0;
+
+				// Posición inicial del pizarrón (primer keyframe)
+				pizarronPosX = pizKF[0].x;
+				pizarronPosY = pizKF[0].y;
+				pizarronPosZ = pizKF[0].z;
+				pizarronRotY = pizKF[0].rotY;
+
+				// Interpolación hacia el siguiente keyframe
+				interpolarPizarron();
+			}
+			else {
+				i_curr_steps = 0;
+				interpolarProyector();
+			}
+		}
+		else {
+			proyectorPosX += ProyectorKF[PlayIndexProyector].incX;
+			proyectorPosY += ProyectorKF[PlayIndexProyector].incY;
+			proyectorPosZ += ProyectorKF[PlayIndexProyector].incZ;
+			proyectorRotY += ProyectorKF[PlayIndexProyector].incRotY;
+			i_curr_steps++;
+		}
+	}
+}
+
+
+
+
+
+
 
 int main()
 {
@@ -178,6 +321,9 @@ int main()
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 	Model salon((char*)"Models/salon/Estructura.obj");
+	// Para keyframes
+	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
+	Model pizarron((char*)"Models/pizarronNuevo/pizzaron.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -215,7 +361,11 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
+
 		animacion();
+		animacionSilla();
+		animarProyector();
+		animarPizarronmov();
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -292,6 +442,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelSalon));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		salon.Draw(lightingShader);
+
 		// Sillas
 		glm::mat4 modelSilla(1);
 		for (size_t i = 0; i < 31; i++)
@@ -313,6 +464,39 @@ int main()
 			}
 		}
 
+
+		// Proyector animado con KeyFrames
+		if (playProyector || PlayIndexProyector < FrameIndexProyector - 1) {
+			glm::mat4 modelProyector(1);
+			modelProyector = glm::mat4(1);
+			modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
+			modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
+			modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
+			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			proyector.Draw(lightingShader);
+		}
+		if (animarPizarron || mostrarPizarron) {
+			glm::mat4 modelPiz(1);
+			modelPiz = glm::mat4(1);
+			modelPiz = glm::translate(modelPiz, glm::vec3(pizarronPosX, pizarronPosY, pizarronPosZ));
+			modelPiz = glm::rotate(modelPiz, glm::radians(pizarronRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPiz));
+			//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			pizarron.Draw(lightingShader);
+		}
+
+
+		//glm::mat4 modelpizarron(1);
+		//modelpizarron = glm::mat4(1);
+		////modelpizarron = glm::scale(modelpizarron, glm::vec3(1.0f));
+		//modelpizarron = glm::translate(modelpizarron, glm::vec3(2.0f, 3.0f, -23.0f));
+		//modelpizarron = glm::rotate(modelpizarron, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelpizarron));
+		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		//pizarron.Draw(lightingShader);
+
+
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
 
@@ -329,6 +513,7 @@ int main()
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
 		// Draw the light object (using light's vertex attributes)
 		model = glm::mat4(1);
 		model = glm::translate(model, pointLightPositions[0]);
@@ -425,6 +610,38 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	{
 		reiniciar();
 	}
+	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+		if (!playProyector && FrameIndexProyector > 1) {
+			// Reiniciar animación del proyector
+			PlayIndexProyector = 0;
+			i_curr_steps = 0;
+			proyectorPosX = ProyectorKF[0].posX;
+			proyectorPosY = ProyectorKF[0].posY;
+			proyectorPosZ = ProyectorKF[0].posZ;
+			proyectorRotY = ProyectorKF[0].rotY;
+			interpolarProyector();
+			playProyector = true;
+
+			// Reiniciar animación y visibilidad del pizarrón
+			animarPizarron = false;
+			mostrarPizarron = false; // ← esto hace que desaparezca hasta que vuelva a animarse
+			pasosPizarron = 0;
+			PlayIndexPizarron = 0;
+			pizarronPosX = pizKF[0].x;
+			pizarronPosY = pizKF[0].y;
+			pizarronPosZ = pizKF[0].z;
+			pizarronRotY = pizKF[0].rotY;
+		}
+	}
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		std::cout << "📌 Posición actual del pizarrón:\n";
+		std::cout << "X = " << pizarronPosX << ", Y = " << pizarronPosY << ", Z = " << pizarronPosZ << std::endl;
+		std::cout << "RotY = " << pizarronRotY << std::endl;
+	}
+
+
+
+
 }
 
 // Reiniciar la simulacion
