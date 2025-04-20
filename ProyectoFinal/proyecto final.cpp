@@ -127,7 +127,6 @@ struct Silla
 Silla sillas[31];
 
 // Deltatime
-GLfloat currentFrame = glfwGetTime();
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
@@ -213,7 +212,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Calculate deltatime of current frame
-		currentFrame = glfwGetTime();
+		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
@@ -372,46 +371,15 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
-	if (keys[GLFW_KEY_T])
-	{
-		pointLightPositions[0].x += 0.01f;
-	}
-	if (keys[GLFW_KEY_G])
-	{
-		pointLightPositions[0].x -= 0.01f;
-	}
-
-	if (keys[GLFW_KEY_Y])
-	{
-		pointLightPositions[0].y += 0.01f;
-	}
-
-	if (keys[GLFW_KEY_H])
-	{
-		pointLightPositions[0].y -= 0.01f;
-	}
-	if (keys[GLFW_KEY_U])
-	{
-		pointLightPositions[0].z -= 0.1f;
-	}
-	if (keys[GLFW_KEY_J])
-	{
-		pointLightPositions[0].z += 0.01f;
-	}
 }
 
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
-	if (key == GLFW_KEY_R)
-	{
-		reiniciar();
-	}
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-	if (animacionActiva[0]) return;
 	if (key >= 0 && key < 1024)
 	{
 		if (action == GLFW_PRESS)
@@ -422,6 +390,10 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		{
 			keys[key] = false;
 		}
+	}
+	if (key == GLFW_KEY_R)
+	{
+		reiniciar();
 	}
 	if (key == GLFW_KEY_N)
 	{
