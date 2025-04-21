@@ -24,13 +24,13 @@
 #include "Model.h"
 
 // Function prototypes
-void inicializarSillas();
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void reiniciar();
 void DoMovement();
 void animacion();
 void controlCamara();
+void inicializarSillas();
 void animarSilla();
 void interpolarPizarron();
 void animarPizarronmov();
