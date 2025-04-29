@@ -186,6 +186,16 @@ struct Silla
 //Animacion sillas
 Silla sillas[31];
 
+// Animacion humano
+glm::vec3 humanoPos(0.0f, 0.0f, 0.0f);
+float humanoTorsoRot = 0.0f;
+float humanoCabezaRot = 0.0f;
+float humanoBrazoDerRot_x = 0.0f;
+float humanoBrazoDerRot_y = 0.0f;
+float humanoBrazoIzqRot_x = 0.0f;
+float humanoBrazoIzqRot_y = 0.0f;
+float humanoPierna = 0.0f;
+
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
@@ -236,6 +246,12 @@ int main()
 	Model salon((char*)"Models/salon/Estructura.obj");
 	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
 	Model pizarron((char*)"Models/pizarronNuevo/pizzaron.obj");
+	Model humanoBrazoDer((char*)"Models/humano/brazoDer.obj");
+	Model humanoBrazoIzq((char*)"Models/humano/brazoIzq.obj");
+	Model humanoCabeza((char*)"Models/humano/cabeza.obj");
+	Model humanoPiernaDer((char*)"Models/humano/piernaDer.obj");
+	Model humanoPiernaIzq((char*)"Models/humano/piernaIzq.obj");
+	Model humanoTorso((char*)"Models/humano/torso.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -396,6 +412,49 @@ int main()
 			//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			pizarron.Draw(lightingShader);
 		}
+
+		// Humano
+		glm::mat4 modelHumanoTemp = glm::mat4(1.0f);
+		glm::mat4 modelHumano = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		// Cuerpo
+		modelHumanoTemp = modelHumano = glm::translate(modelHumano, humanoPos);
+		modelHumanoTemp = modelHumano = glm::rotate(modelHumano, glm::radians(humanoTorsoRot), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoTorso.Draw(lightingShader);
+		// Cabeza
+		modelHumano = modelHumanoTemp;
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoCabezaRot), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoCabeza.Draw(lightingShader);
+		// Brazo derecho
+		modelHumano = modelHumanoTemp;
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoDerRot_x), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoDerRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoBrazoDer.Draw(lightingShader);
+		// Brazo izquierdo
+		modelHumano = modelHumanoTemp;
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoIzqRot_x), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoIzqRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoBrazoIzq.Draw(lightingShader);
+		// Pierna derecha
+		modelHumano = modelHumanoTemp;
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, -0.093f, 0.208f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPierna), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoPiernaDer.Draw(lightingShader);
+		// Pierna izquierda
+		modelHumano = modelHumanoTemp;
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, -0.093f, 0.208f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPierna), glm::vec3(-1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		humanoPiernaIzq.Draw(lightingShader);
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
