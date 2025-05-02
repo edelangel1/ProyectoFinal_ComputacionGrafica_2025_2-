@@ -36,6 +36,7 @@ void interpolarPizarron();
 void animarPizarronmov();
 void interpolarProyector();
 void animarProyector();
+void animarHumano();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -108,13 +109,14 @@ float vertices[] = {
 glm::vec3 Light1 = glm::vec3(0);
 
 // Control de animacion
-bool animacionActiva = false;
+bool animacionActiva = false; // Todas las animaciones juntas
 bool animacionSillas = false;
 bool animacionProyector = false;
 bool animacionPizarron = false;
+bool animacionHumano = false;
 
 
-// ============ Keyframes ==============
+// ============ Keyframes proyector y pizzaron==============
 #define MAX_FRAMES 9
 int i_max_steps = 190;
 int i_curr_steps = 0;
@@ -187,14 +189,15 @@ struct Silla
 Silla sillas[31];
 
 // Animacion humano
-glm::vec3 humanoPos(0.0f, 0.0f, 0.0f);
-float humanoTorsoRot = 0.0f;
-float humanoCabezaRot = 0.0f;
+glm::vec3 humanoPos(6.6f, 3.15f, -19.0f);
+float humanoTorsoRot_y = 90.0f;
+float humanoCabezaRot_x = 0.0f;
+float humanoCabezaRot_y = 0.0f;
 float humanoBrazoDerRot_x = 0.0f;
 float humanoBrazoDerRot_y = 0.0f;
 float humanoBrazoIzqRot_x = 0.0f;
 float humanoBrazoIzqRot_y = 0.0f;
-float humanoPierna = 0.0f;
+float humanoPiernaRot = 0.0f;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -290,10 +293,12 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
+		// Animaciones
 		animacion();
 		animarSilla();
 		animarProyector();
 		animarPizarronmov();
+		animarHumano();
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -414,45 +419,54 @@ int main()
 		}
 
 		// Humano
+		float escala = 3.5f;
 		glm::mat4 modelHumanoTemp = glm::mat4(1.0f);
 		glm::mat4 modelHumano = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+
 		// Cuerpo
 		modelHumanoTemp = modelHumano = glm::translate(modelHumano, humanoPos);
-		modelHumanoTemp = modelHumano = glm::rotate(modelHumano, glm::radians(humanoTorsoRot), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelHumanoTemp = modelHumano = glm::rotate(modelHumano, glm::radians(humanoTorsoRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelHumanoTemp = modelHumano = glm::scale(modelHumano, glm::vec3(escala, escala, escala));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoTorso.Draw(lightingShader);
+
 		// Cabeza
 		modelHumano = modelHumanoTemp;
-		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
-		modelHumano = glm::rotate(modelHumano, glm::radians(humanoCabezaRot), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.541f, 0.022f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoCabezaRot_x), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoCabezaRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoCabeza.Draw(lightingShader);
+
 		// Brazo derecho
 		modelHumano = modelHumanoTemp;
-		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
+		modelHumano = glm::translate(modelHumano, glm::vec3(-0.14f, 0.434f, 0.027f));
 		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoDerRot_x), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoDerRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoBrazoDer.Draw(lightingShader);
+
 		// Brazo izquierdo
 		modelHumano = modelHumanoTemp;
-		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, 0.093f, 0.208f));
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.14f, 0.434f, 0.027f));
 		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoIzqRot_x), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoIzqRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoBrazoIzq.Draw(lightingShader);
+
 		// Pierna derecha
 		modelHumano = modelHumanoTemp;
-		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, -0.093f, 0.208f));
-		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPierna), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelHumano = glm::translate(modelHumano, glm::vec3(-0.073f, 0.028f, 0.027f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPiernaRot), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoPiernaDer.Draw(lightingShader);
+
 		// Pierna izquierda
 		modelHumano = modelHumanoTemp;
-		modelHumano = glm::translate(modelHumano, glm::vec3(0.0f, -0.093f, 0.208f));
-		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPierna), glm::vec3(-1.0f, 0.0f, 0.0f));
+		modelHumano = glm::translate(modelHumano, glm::vec3(0.073f, 0.028f, 0.027f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(humanoPiernaRot), glm::vec3(-1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoPiernaIzq.Draw(lightingShader);
 
@@ -579,6 +593,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			animacionPizarron = false;
 		}
 	}
+	if (key == GLFW_KEY_H && action == GLFW_PRESS) 
+	{
+		if (!animacionActiva && !animacionHumano)
+		{
+			animacionHumano = true;
+			humanoTorsoRot_y = 90.0f;
+			humanoBrazoDerRot_x = humanoBrazoDerRot_y = 0;
+			humanoBrazoIzqRot_x = humanoBrazoIzqRot_y = 0;
+			humanoCabezaRot_x = humanoCabezaRot_y = 0;
+			humanoPiernaRot = 0.0f;
+		}
+	}
 }
 
 // Is called whenever the mouse moves
@@ -605,6 +631,7 @@ void reiniciar()
 	animacionSillas = false;
 	animacionProyector = false;
 	animacionPizarron = false;
+	animacionHumano = false;
 	inicializarSillas();
 
 	// Reiniciar animación del proyector
@@ -624,6 +651,14 @@ void reiniciar()
 	pizarronPosY = pizKF[0].y;
 	pizarronPosZ = pizKF[0].z;
 	pizarronRotY = pizKF[0].rotY;
+
+	// Reiniciar humano
+	humanoTorsoRot_y = 90.0f;
+	humanoBrazoDerRot_x = humanoBrazoDerRot_y = 0;
+	humanoBrazoIzqRot_x = humanoBrazoIzqRot_y = 0;
+	humanoCabezaRot_x = humanoCabezaRot_y = 0;
+	humanoPiernaRot = 0.0f;
+	humanoPos = glm::vec3(6.6f, 3.15f, -19.0f);
 }
 
 // Control general de animacion
@@ -636,7 +671,7 @@ void animacion()
 	controlCamara();
 
 	// Verificar si ya terminaron todas las animaciones
-	if (!animacionSillas && !animacionProyector && !animacionPizarron)
+	if (!animacionSillas && !animacionProyector && !animacionPizarron && !animacionHumano)
 	{
 		animacionActiva = false;
 	}
@@ -1369,4 +1404,9 @@ void animarProyector()
 			i_curr_steps++;
 		}
 	}
+}
+
+void animarHumano()
+{
+	if (!animacionHumano) return;
 }
