@@ -124,15 +124,24 @@ struct KeyFrameProyector {
 
 // Proyector =============================///
 // Posiciones para que haga el recorrido de salida
+
+//KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
+//	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
+//	{ 6.0f, 5.0f, 0.0f, 0.0f },
+//	{ 12.0f, 5.0f, 0.0f, 0.0f },
+//	{ 12.0f, 2.0f, 0.0f, 0.0f },
+//	{ 12.0f, 2.0f, 15.0f, 0.0f },
+//};
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
 	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
-	{ 6.0f, 5.0f, 0.0f, 0.0f },    // avanza en Z
-	{ 12.0f, 5.0f, 0.0f, 0.0f },     // gira para estar altura de entrada
-	{ 12.0f, 2.0f, 0.0f, 0.0f },
-	{ 12.0f, 2.0f, 15.0f, 0.0f },
+	{ 6.0f, -10.0f, -11.0f, 90.0f },    // esta en el suelo
+	{ 6.0f, -10.0f, -10.0f, 90.0f },
+	{ 6.0f, -10.0f, -9.0f, 90.0f },
+	{ 8.0f, -10.0f, -9.0f, 90.0f },
+	{ 8.0f, -10.0f, 15.0f, 90.0f },
 };
 
-int FrameIndexProyector = 5;
+int FrameIndexProyector = 6;
 int PlayIndexProyector = 0;
 bool playProyector = false;
 
@@ -551,7 +560,7 @@ int main()
 			modelProyector = glm::mat4(1);
 			modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
 			modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
-			modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+			modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(1.0f, 0.0f, 0.0f));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelProyector));
 			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			proyector.Draw(lightingShader);
@@ -713,6 +722,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+		// Reiniciar balón
 		PlayIndexBalon = 0;
 		pasosBalon = 0;
 		balonX = balonKF[0].x;
@@ -721,7 +731,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		animarBalon = true;
 		mostrarBalon = true;
 		interpolarBalon();
+		// Reiniciar pizarrón
+		animarPizarron = false;
+		mostrarPizarron = true;  
+		pasosPizarron = 0;
+		PlayIndexPizarron = 0;
+		pizarronPosX = 100.0f;
+		pizarronPosY = 100.0f;
+		pizarronPosZ = 100.0f;
+		pizarronRotY = pizKF[0].rotY;
+		// Reiniciar proyector
+		playProyector = false;
+		PlayIndexProyector = 0;
+		i_curr_steps = 0;
+		proyectorPosX = ProyectorKF[0].posX;
+		proyectorPosY = ProyectorKF[0].posY;
+		proyectorPosZ = ProyectorKF[0].posZ;
+		proyectorRotY = ProyectorKF[0].rotY;
 	}
+
 
 
 
