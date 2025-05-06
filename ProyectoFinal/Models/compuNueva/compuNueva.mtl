@@ -1,0 +1,32 @@
+# Blender 4.4.0 MTL File: 'MacbookTerminado.blend'
+# www.blender.org
+
+newmtl MaterialMacbookKeyboard
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd MacBookProKeyboard.jpg
+
+newmtl MaterialMacbookPro
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd MacbookPro.jpeg
+
+newmtl MaterialSwiftMacScreen
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd screen-mac-app-store-large_2x.jpg

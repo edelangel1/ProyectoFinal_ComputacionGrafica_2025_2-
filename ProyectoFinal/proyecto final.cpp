@@ -1,4 +1,6 @@
-﻿#include <iostream>
+﻿// ANIMACION COMPLEJA
+
+#include <iostream>
 #include <cmath>
 
 // GLEW
@@ -24,18 +26,16 @@
 #include "Model.h"
 
 // Function prototypes
+void inicializarSillas();
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void reiniciar();
 void DoMovement();
 void animacion();
 void controlCamara();
-void inicializarSillas();
-void animarSilla();
-void interpolarPizarron();
-void animarPizarronmov();
-void interpolarProyector();
-void animarProyector();
+void animacionSilla();
+void interpolarProyector(); 
+
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -43,7 +43,6 @@ int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
 Camera  camera(glm::vec3(20.0f, 10.0f, -22.0f));
-float contadorCamara = 0.0;
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -109,28 +108,23 @@ glm::vec3 Light1 = glm::vec3(0);
 
 // Control de animacion
 bool animacionActiva = false;
-bool animacionSillas = false;
-bool animacionProyector = false;
-bool animacionPizarron = false;
-
 
 // ============ Keyframes ==============
 #define MAX_FRAMES 9
 int i_max_steps = 190;
 int i_curr_steps = 0;
 
-struct KeyFrameProyector 
-{
+struct KeyFrameProyector {
 	float posX, posY, posZ;
 	float rotY;
 	float incX, incY, incZ;
 	float incRotY;
 };
 
-// Proyector
+
+// Proyector =============================///
 // Posiciones para que haga el recorrido de salida
-KeyFrameProyector ProyectorKF[MAX_FRAMES] = 
-{
+KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
 	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
 	{ 6.0f, 5.0f, 0.0f, 0.0f },    // avanza en Z
 	{ 12.0f, 5.0f, 0.0f, 0.0f },     // gira para estar altura de entrada
@@ -140,21 +134,21 @@ KeyFrameProyector ProyectorKF[MAX_FRAMES] =
 
 int FrameIndexProyector = 5;
 int PlayIndexProyector = 0;
+bool playProyector = false;
 
 float proyectorPosX = 6.0f, proyectorPosY = 5.0f, proyectorPosZ = -11.0f;
 float proyectorRotY = 0.0f;
+// ======================================///
 
-// PIZARRÓN CON MULTI-KEYFRAMES
+// PIZARRÓN CON MULTI-KEYFRAMES -----------------------------
 const int MAX_FRAMES_PIZARRON = 5;
 
-struct KeyFramePizarron 
-{
+struct KeyFramePizarron {
 	float x, y, z, rotY;
 	float incX, incY, incZ, incRotY;
 };
 
-KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = 
-{
+KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
 	{ 22.0f, 2.0f, 15.0f, 0.0f },  // Inicio
 	{ 22.0f, 2.0f, -10.0f, 0.0f },  // entra al salon
 	{ 22.0f, 3.0f, -10.0f, 0.0f },	// toma altura
@@ -166,9 +160,120 @@ int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
 int PlayIndexPizarron = 0;
 int pasosPizarron = 0;
 int maxPasosPizarron = 90;
+bool animarPizarron = false;
 
 float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
 float pizarronRotY = 0.0f;
+// --------------------------------------------------///
+
+// Balon =============================///
+// aca definimos lo necesario para los keyframes
+bool mostrarBalon = false;
+float balonRot = 0.0f;
+float balonIncRot = 0.0f;
+
+struct KeyFrameBalon {
+	float x, y, z;
+	float incX, incY, incZ;
+	float rot;
+};
+
+KeyFrameBalon balonKF[9] = {
+	{ 5.0f, 0.0f, -18.0f, 0.0f },
+	{ 6.0f, 7.0f, -11.0f, 180.0f }, // aqui pega al proyector
+	{ 5.5f, 0.0f, -10.0f, 360.0f }, // aca cae al suele rebote 1
+	{ 5.0f, 2.0f, -9.0f, 540.0f }, 
+	{ 4.5f, 0.0f, -8.0f, 720.0f }, // rebote 2
+	{ 4.3f, 1.5f, -7.0f, 540.0f },
+	{ 4.1f, 0.0f, -6.5f, 720.0f },
+	{ 3.9f, 0.5f, -6.0f, 540.0f },
+	{ 3.8f, 0.0f, -5.5f, 720.0f }
+};
+int FrameIndexBalon = 9;
+int PlayIndexBalon = 0;
+int pasosBalon = 0;
+int maxPasosBalon = 60;
+bool animarBalon = false;
+float balonX = balonKF[0].x, balonY = balonKF[0].y, balonZ = balonKF[0].z;
+
+//  FUNCIONES DEL BALON
+void interpolarBalon() {
+	balonKF[PlayIndexBalon].incX = (balonKF[PlayIndexBalon + 1].x - balonKF[PlayIndexBalon].x) / maxPasosBalon;
+	balonKF[PlayIndexBalon].incY = (balonKF[PlayIndexBalon + 1].y - balonKF[PlayIndexBalon].y) / maxPasosBalon;
+	balonKF[PlayIndexBalon].incZ = (balonKF[PlayIndexBalon + 1].z - balonKF[PlayIndexBalon].z) / maxPasosBalon;
+	balonIncRot = (balonKF[PlayIndexBalon + 1].rot - balonKF[PlayIndexBalon].rot) / maxPasosBalon; 
+}
+
+void animarBalonMov() {
+	if (animarBalon) {
+		balonX += balonKF[PlayIndexBalon].incX;
+		balonY += balonKF[PlayIndexBalon].incY;
+		balonZ += balonKF[PlayIndexBalon].incZ;
+		balonRot += balonIncRot;
+		pasosBalon++;
+
+		if (pasosBalon >= maxPasosBalon) {
+			pasosBalon = 0;
+			PlayIndexBalon++;
+			if (PlayIndexBalon == 1) {
+				playProyector = true;
+				PlayIndexProyector = 0;
+				i_curr_steps = 0;
+				proyectorPosX = ProyectorKF[0].posX;
+				proyectorPosY = ProyectorKF[0].posY;
+				proyectorPosZ = ProyectorKF[0].posZ;
+				proyectorRotY = ProyectorKF[0].rotY;
+				interpolarProyector();
+			}
+			if (PlayIndexBalon >= FrameIndexBalon - 1) {
+				animarBalon = false;
+			}
+			else {
+				interpolarBalon();
+			}
+		}
+	}
+}
+
+
+
+// ======================================///
+
+void interpolarPizarron() {
+	pizKF[PlayIndexPizarron].incX = (pizKF[PlayIndexPizarron + 1].x - pizKF[PlayIndexPizarron].x) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incY = (pizKF[PlayIndexPizarron + 1].y - pizKF[PlayIndexPizarron].y) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incZ = (pizKF[PlayIndexPizarron + 1].z - pizKF[PlayIndexPizarron].z) / maxPasosPizarron;
+	pizKF[PlayIndexPizarron].incRotY = (pizKF[PlayIndexPizarron + 1].rotY - pizKF[PlayIndexPizarron].rotY) / maxPasosPizarron;
+
+	pizarronPosX = pizKF[PlayIndexPizarron].x;
+	pizarronPosY = pizKF[PlayIndexPizarron].y;
+	pizarronPosZ = pizKF[PlayIndexPizarron].z;
+	pizarronRotY = pizKF[PlayIndexPizarron].rotY;
+}
+
+void animarPizarronmov() {
+	if (animarPizarron) {
+		if (pasosPizarron >= maxPasosPizarron) {
+			PlayIndexPizarron++;
+			if (PlayIndexPizarron >= FrameIndexPizarron - 1) {
+				animarPizarron = false;
+			}
+			else {
+				pasosPizarron = 0;
+				interpolarPizarron();
+			}
+		}
+		else {
+			pizarronPosX += pizKF[PlayIndexPizarron].incX;
+			pizarronPosY += pizKF[PlayIndexPizarron].incY;
+			pizarronPosZ += pizKF[PlayIndexPizarron].incZ;
+			pizarronRotY += pizKF[PlayIndexPizarron].incRotY;
+			pasosPizarron++;
+		}
+	}
+}
+
+
 
 // estructura modelo silla
 struct Silla
@@ -187,14 +292,69 @@ struct Silla
 Silla sillas[31];
 
 // Deltatime
+GLfloat currentFrame = glfwGetTime();
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
+
+
+// ======== Funciones para Keyframes ===============
+void interpolarProyector() {
+	ProyectorKF[PlayIndexProyector].incX = (ProyectorKF[PlayIndexProyector + 1].posX - ProyectorKF[PlayIndexProyector].posX) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incY = (ProyectorKF[PlayIndexProyector + 1].posY - ProyectorKF[PlayIndexProyector].posY) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
+	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
+}
+void animarProyector() {
+	if (playProyector) {
+		if (i_curr_steps >= i_max_steps) {
+			PlayIndexProyector++;
+			if (PlayIndexProyector >= FrameIndexProyector - 1) {
+				playProyector = false;
+				//Inicia la animación del pizarrón usando los keyframes definidos en pizKF
+				animarPizarron = true;
+				mostrarPizarron = true;
+				pasosPizarron = 0;
+				PlayIndexPizarron = 0;
+				//Posición inicial del pizarrón (primer keyframe)
+				pizarronPosX = pizKF[0].x;
+				pizarronPosY = pizKF[0].y;
+				pizarronPosZ = pizKF[0].z;
+				pizarronRotY = pizKF[0].rotY;
+
+				//Interpolación hacia el siguiente keyframe
+				interpolarPizarron();
+			}
+			else {
+				i_curr_steps = 0;
+				interpolarProyector();
+			}
+		}
+		else {
+			proyectorPosX += ProyectorKF[PlayIndexProyector].incX;
+			proyectorPosY += ProyectorKF[PlayIndexProyector].incY;
+			proyectorPosZ += ProyectorKF[PlayIndexProyector].incZ;
+			proyectorRotY += ProyectorKF[PlayIndexProyector].incRotY;
+			i_curr_steps++;
+		}
+	}
+}
+
+
+
+
+
+
 
 int main()
 {
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
+	/*glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto final", nullptr, nullptr);
@@ -215,6 +375,9 @@ int main()
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, MouseCallback);
 
+	// GLFW Options
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
 	// Initialize GLEW to setup the OpenGL Function pointers
@@ -234,8 +397,11 @@ int main()
 	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
 	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 	Model salon((char*)"Models/salon/Estructura.obj");
+	// Para keyframes
 	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
 	Model pizarron((char*)"Models/pizarronNuevo/pizzaron.obj");
+	Model balon((char*)"Models/balon/balon.obj");
+
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -262,22 +428,24 @@ int main()
 
 	// Inicializar las sillas
 	inicializarSillas();
-
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// Calculate deltatime of current frame
-		GLfloat currentFrame = glfwGetTime();
+		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
+
 		animacion();
-		animarSilla();
+		animacionSilla();
 		animarProyector();
 		animarPizarronmov();
+		animarBalonMov();
+
 
 		// Clear the colorbuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -376,8 +544,9 @@ int main()
 			}
 		}
 
+
 		// Proyector animado con KeyFrames
-		if (animacionProyector || PlayIndexProyector < FrameIndexProyector - 1) {
+		if (playProyector || PlayIndexProyector < FrameIndexProyector - 1) {
 			glm::mat4 modelProyector(1);
 			modelProyector = glm::mat4(1);
 			modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
@@ -387,15 +556,26 @@ int main()
 			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			proyector.Draw(lightingShader);
 		}
-		if (animacionPizarron || mostrarPizarron) {
+		if (animarPizarron || mostrarPizarron) {
 			glm::mat4 modelPiz(1);
 			modelPiz = glm::mat4(1);
 			modelPiz = glm::translate(modelPiz, glm::vec3(pizarronPosX, pizarronPosY, pizarronPosZ));
 			modelPiz = glm::rotate(modelPiz, glm::radians(pizarronRotY), glm::vec3(0.0f, 1.0f, 0.0f));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelPiz));
-			//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			pizarron.Draw(lightingShader);
 		}
+
+		glm::mat4 modelBalon = glm::mat4(1.0f);
+		modelBalon = glm::translate(modelBalon, glm::vec3(balonX, balonY, balonZ));
+		modelBalon = glm::rotate(modelBalon, glm::radians(balonRot), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelBalon = glm::scale(modelBalon, glm::vec3(1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelBalon));
+		balon.Draw(lightingShader);
+
+
+
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -452,11 +632,38 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
+	if (keys[GLFW_KEY_T])
+	{
+		pointLightPositions[0].x += 0.01f;
+	}
+	if (keys[GLFW_KEY_G])
+	{
+		pointLightPositions[0].x -= 0.01f;
+	}
+
+	if (keys[GLFW_KEY_Y])
+	{
+		pointLightPositions[0].y += 0.01f;
+	}
+
+	if (keys[GLFW_KEY_H])
+	{
+		pointLightPositions[0].y -= 0.01f;
+	}
+	if (keys[GLFW_KEY_U])
+	{
+		pointLightPositions[0].z -= 0.1f;
+	}
+	if (keys[GLFW_KEY_J])
+	{
+		pointLightPositions[0].z += 0.01f;
+	}
 }
 
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+	if (animacionActiva) return;
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -472,33 +679,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			keys[key] = false;
 		}
 	}
+	if (key == GLFW_KEY_N)
+	{
+		if (!animacionActiva)
+		{
+			animacionActiva = true;
+		}
+	}
 	if (key == GLFW_KEY_R)
 	{
 		reiniciar();
 	}
-	if (key == GLFW_KEY_Z)
-	{
-		if (!animacionActiva)
-		{
-			reiniciar();
-			animacionActiva = true;
-			animacionSillas = true;
-			animacionProyector = true;
-			animacionPizarron = false;
-			camera.SetPosition(glm::vec3(18.5, 8.0, 0));
-			camera.SetFront(glm::normalize(glm::vec3(18.5f, 5.0f, -22.0f) - glm::vec3(18.5, 8.0, 0)));
-		}
-	}
-	if (key == GLFW_KEY_N)
-	{
-		if (!animacionActiva && !animacionSillas)
-		{
-			inicializarSillas();
-			animacionSillas = true;
-		}
-	}
 	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
-		if (!animacionActiva && !animacionProyector && FrameIndexProyector > 1) {
+		if (!playProyector && FrameIndexProyector > 1) {
 			// Reiniciar animación del proyector
 			PlayIndexProyector = 0;
 			i_curr_steps = 0;
@@ -507,93 +700,62 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			proyectorPosZ = ProyectorKF[0].posZ;
 			proyectorRotY = ProyectorKF[0].rotY;
 			interpolarProyector();
-			animacionProyector = true;
-
+			playProyector = true;
 			// Reiniciar animación y visibilidad del pizarrón
-			mostrarPizarron = false; // ← esto hace que desaparezca hasta que vuelva a animarse
+			animarPizarron = false;
+			mostrarPizarron = false; 
 			pasosPizarron = 0;
 			PlayIndexPizarron = 0;
 			pizarronPosX = pizKF[0].x;
 			pizarronPosY = pizKF[0].y;
 			pizarronPosZ = pizKF[0].z;
 			pizarronRotY = pizKF[0].rotY;
-			animacionPizarron = false;
 		}
 	}
-}
-
-// Is called whenever the mouse moves
-void MouseCallback(GLFWwindow* window, double xPos, double yPos)
-{
-	if (animacionActiva) return;
-	if (firstMouse)
-	{
-		lastX = xPos;
-		lastY = yPos;
-		firstMouse = false;
+	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+		PlayIndexBalon = 0;
+		pasosBalon = 0;
+		balonX = balonKF[0].x;
+		balonY = balonKF[0].y;
+		balonZ = balonKF[0].z;
+		animarBalon = true;
+		mostrarBalon = true;
+		interpolarBalon();
 	}
-	GLfloat xOffset = xPos - lastX;
-	GLfloat yOffset = lastY - yPos;  // Reversed since y-coordinates go from bottom to left
-	lastX = xPos;
-	lastY = yPos;
-	camera.ProcessMouseMovement(xOffset, yOffset);
+
+
+
+
+
 }
 
 // Reiniciar la simulacion
 void reiniciar()
 {
 	animacionActiva = false;
-	animacionSillas = false;
-	animacionProyector = false;
-	animacionPizarron = false;
 	inicializarSillas();
-
-	// Reiniciar animación del proyector
-	PlayIndexProyector = 0;
-	i_curr_steps = 0;
-	proyectorPosX = ProyectorKF[0].posX;
-	proyectorPosY = ProyectorKF[0].posY;
-	proyectorPosZ = ProyectorKF[0].posZ;
-	proyectorRotY = ProyectorKF[0].rotY;
-	interpolarProyector();
-
-	// Reiniciar animación y visibilidad del pizarrón
-	mostrarPizarron = false; // ← esto hace que desaparezca hasta que vuelva a animarse
-	pasosPizarron = 0;
-	PlayIndexPizarron = 0;
-	pizarronPosX = pizKF[0].x;
-	pizarronPosY = pizKF[0].y;
-	pizarronPosZ = pizKF[0].z;
-	pizarronRotY = pizKF[0].rotY;
 }
 
 // Control general de animacion
 void animacion()
 {
-	// Validar que la animacion este activa
-	if (!animacionActiva) return; 
-
-	// Mover la camara
+	if (!animacionActiva) return;
+	animacionSilla();
 	controlCamara();
-
-	// Verificar si ya terminaron todas las animaciones
-	if (!animacionSillas && !animacionProyector && !animacionPizarron)
-	{
-		animacionActiva = false;
-	}
 }
 
 // Control de la camara
 void controlCamara()
 {
+	float ciclo = fmod(currentFrame, 1500.0f);
 	float radioMayor = 19.0;
 	float radioMenor = 16.0f;
 	float y = 8.0f;
-	glm::vec3 centro = glm::vec3(18.5f, 5.0f, -22.0f);
+	glm::vec3 centro = glm::vec3(18.5f, 0.0f, -22.0f);
 
 	// Calcular nueva posición
-	float x = (cos(contadorCamara) * radioMenor) + centro.x;
-	float z = (sin(contadorCamara) * radioMayor) + centro.z;
+	float x = (cos(ciclo) * radioMenor) + centro.x;
+	float z = (sin(ciclo) * radioMayor) + centro.z;
 	glm::vec3 newPosition = glm::vec3(x, y, z);
 
 	// Establecer nueva posición
@@ -602,8 +764,6 @@ void controlCamara()
 	// Calcular y establecer la dirección hacia el centro
 	glm::vec3 newFront = glm::normalize(centro - newPosition);
 	camera.SetFront(newFront);
-
-	contadorCamara += 1.7E-3;
 }
 
 // Inicializa las sillas
@@ -717,8 +877,7 @@ void inicializarSillas()
 }
 
 // Animaciones
-void animarSilla() {
-	if (!animacionSillas) return;
+void animacionSilla() {
 	// Limites de las sillas
 	float x1 = 3.5f;
 	float x2 = 21.0f;
@@ -1218,96 +1377,24 @@ void animarSilla() {
 				sillas[i].estadoAnimacion = 18;
 			}
 			break;
-		case 21:
-			if (i == 30)
-			{
-				animacionSillas = false;
-			}
-			break;
 		default:
 			break;
 		}
 	}
 }
 
-void interpolarPizarron()
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
-	pizKF[PlayIndexPizarron].incX = (pizKF[PlayIndexPizarron + 1].x - pizKF[PlayIndexPizarron].x) / maxPasosPizarron;
-	pizKF[PlayIndexPizarron].incY = (pizKF[PlayIndexPizarron + 1].y - pizKF[PlayIndexPizarron].y) / maxPasosPizarron;
-	pizKF[PlayIndexPizarron].incZ = (pizKF[PlayIndexPizarron + 1].z - pizKF[PlayIndexPizarron].z) / maxPasosPizarron;
-	pizKF[PlayIndexPizarron].incRotY = (pizKF[PlayIndexPizarron + 1].rotY - pizKF[PlayIndexPizarron].rotY) / maxPasosPizarron;
-
-	pizarronPosX = pizKF[PlayIndexPizarron].x;
-	pizarronPosY = pizKF[PlayIndexPizarron].y;
-	pizarronPosZ = pizKF[PlayIndexPizarron].z;
-	pizarronRotY = pizKF[PlayIndexPizarron].rotY;
-}
-
-void animarPizarronmov()
-{
-	if (animacionPizarron) {
-		if (pasosPizarron >= maxPasosPizarron) {
-			PlayIndexPizarron++;
-			if (PlayIndexPizarron >= FrameIndexPizarron - 1) {
-				animacionPizarron = false;
-			}
-			else {
-				pasosPizarron = 0;
-				interpolarPizarron();
-			}
-		}
-		else {
-			pizarronPosX += pizKF[PlayIndexPizarron].incX;
-			pizarronPosY += pizKF[PlayIndexPizarron].incY;
-			pizarronPosZ += pizKF[PlayIndexPizarron].incZ;
-			pizarronRotY += pizKF[PlayIndexPizarron].incRotY;
-			pasosPizarron++;
-		}
+	if (animacionActiva) return;
+	if (firstMouse)
+	{
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
 	}
-}
-
-void interpolarProyector()
-{
-	ProyectorKF[PlayIndexProyector].incX = (ProyectorKF[PlayIndexProyector + 1].posX - ProyectorKF[PlayIndexProyector].posX) / i_max_steps;
-	ProyectorKF[PlayIndexProyector].incY = (ProyectorKF[PlayIndexProyector + 1].posY - ProyectorKF[PlayIndexProyector].posY) / i_max_steps;
-	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
-	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
-}
-
-void animarProyector()
-{
-	if (animacionProyector) {
-		if (i_curr_steps >= i_max_steps) {
-			PlayIndexProyector++;
-			if (PlayIndexProyector >= FrameIndexProyector - 1) {
-				animacionProyector = false;
-
-				// ✅ Inicia la animación del pizarrón usando los keyframes definidos en pizKF[]
-				animacionPizarron = true;
-				mostrarPizarron = true;
-				pasosPizarron = 0;
-				PlayIndexPizarron = 0;
-
-				// Posición inicial del pizarrón (primer keyframe)
-				pizarronPosX = pizKF[0].x;
-				pizarronPosY = pizKF[0].y;
-				pizarronPosZ = pizKF[0].z;
-				pizarronRotY = pizKF[0].rotY;
-
-				// Interpolación hacia el siguiente keyframe
-				interpolarPizarron();
-			}
-			else {
-				i_curr_steps = 0;
-				interpolarProyector();
-			}
-		}
-		else {
-			proyectorPosX += ProyectorKF[PlayIndexProyector].incX;
-			proyectorPosY += ProyectorKF[PlayIndexProyector].incY;
-			proyectorPosZ += ProyectorKF[PlayIndexProyector].incZ;
-			proyectorRotY += ProyectorKF[PlayIndexProyector].incRotY;
-			i_curr_steps++;
-		}
-	}
+	GLfloat xOffset = xPos - lastX;
+	GLfloat yOffset = lastY - yPos;  // Reversed since y-coordinates go from bottom to left
+	lastX = xPos;
+	lastY = yPos;
+	camera.ProcessMouseMovement(xOffset, yOffset);
 }
