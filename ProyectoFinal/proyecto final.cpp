@@ -124,21 +124,13 @@ struct KeyFrameProyector {
 
 // Proyector =============================///
 // Posiciones para que haga el recorrido de salida
-
-//KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
-//	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
-//	{ 6.0f, 5.0f, 0.0f, 0.0f },
-//	{ 12.0f, 5.0f, 0.0f, 0.0f },
-//	{ 12.0f, 2.0f, 0.0f, 0.0f },
-//	{ 12.0f, 2.0f, 15.0f, 0.0f },
-//};
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
 	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
 	{ 6.0f, -10.0f, -11.0f, 90.0f },    // esta en el suelo
 	{ 6.0f, -10.0f, -10.0f, 90.0f },
 	{ 6.0f, -10.0f, -9.0f, 90.0f },
-	{ 8.0f, -10.0f, -9.0f, 90.0f },
-	{ 8.0f, -10.0f, 15.0f, 90.0f },
+	{ 8.5f, -10.0f, -9.0f, 90.0f },
+	{ 8.5f, -10.0f, 15.0f, 90.0f },
 };
 
 int FrameIndexProyector = 6;
@@ -150,19 +142,39 @@ float proyectorRotY = 0.0f;
 // ======================================///
 
 // PIZARRÓN CON MULTI-KEYFRAMES -----------------------------
-const int MAX_FRAMES_PIZARRON = 5;
+const int MAX_FRAMES_PIZARRON = 17;
 
 struct KeyFramePizarron {
 	float x, y, z, rotY;
 	float incX, incY, incZ, incRotY;
 };
 
+//KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
+//	{ 22.0f, 2.0f, 15.0f, 0.0f },  // Inicio
+//	{ 22.0f, 2.0f, -10.0f, 0.0f },  // entra al salon
+//	{ 22.0f, 3.0f, -10.0f, 90.0f },	// toma altura
+//	{ 22.0f, 3.0f, -23.0f, 180.0f },
+//	{ 10.0f, 3.0f, -23.0f, 360.0f },
+//	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Fin
+//};
 KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
-	{ 22.0f, 2.0f, 15.0f, 0.0f },  // Inicio
-	{ 22.0f, 2.0f, -10.0f, 0.0f },  // entra al salon
-	{ 22.0f, 3.0f, -10.0f, 0.0f },	// toma altura
-	{ 22.0f, 3.0f, -23.0f, 0.0f },
-	{ 2.0f, 3.0f, -23.0f, 0.0f }   // Fin
+	{ 22.0f, 0.0f, 15.0f, 0.0f },  // Inicio
+	{ 22.0f, 0.0f, -28.0f, 0.0f },  // entra al salon
+	{ 22.0f, 0.0f, -28.0f, 35.0f },  
+	{ 17.0f, 0.0f, -35.0f, 35.0f },
+	{ 17.0f, 0.0f, -35.0f, 45.0f },
+	{ 17.0f, 0.0f, -35.0f, 90.0f },
+	{ 10.0f, 0.0f, -35.0f, 90.0f },
+	{ 10.0f, 0.0f, -37.0f, 45.0f },
+	{ 10.0f, 0.0f, -37.0f, 15.0f }, 
+	{ 10.0f, 0.0f, -37.0f, 0.0f },
+	{ 3.0f, 0.0f, -37.0f, 0.0f }, // se acerca a la pared
+	{ 3.0f, 0.0f, -23.0f, 0.0f },
+	{ 3.0f, 3.0f, -23.0f, 0.0f },
+	{ 5.0f, 3.0f, -23.0f, 0.0f },
+	{ 6.0f, 3.0f, -23.0f, 0.0f },
+	{ 7.0f, 3.0f, -23.0f, 0.0f },
+	{ 2.0f, 3.0f, -23.0f, 0.0f },
 };
 bool mostrarPizarron = false;
 int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
@@ -187,7 +199,7 @@ struct KeyFrameBalon {
 	float rot;
 };
 
-KeyFrameBalon balonKF[9] = {
+KeyFrameBalon balonKF[10] = {
 	{ 5.0f, 0.0f, -18.0f, 0.0f },
 	{ 6.0f, 7.0f, -11.0f, 180.0f }, // aqui pega al proyector
 	{ 5.5f, 0.0f, -10.0f, 360.0f }, // aca cae al suele rebote 1
@@ -196,9 +208,10 @@ KeyFrameBalon balonKF[9] = {
 	{ 4.3f, 1.5f, -7.0f, 540.0f },
 	{ 4.1f, 0.0f, -6.5f, 720.0f },
 	{ 3.9f, 0.5f, -6.0f, 540.0f },
-	{ 3.8f, 0.0f, -5.5f, 720.0f }
+	{ 3.8f, 0.0f, -5.5f, 720.0f },
+	{ 3.7f, 0.0f, -5.3f, 720.0f }
 };
-int FrameIndexBalon = 9;
+int FrameIndexBalon = 10;
 int PlayIndexBalon = 0;
 int pasosBalon = 0;
 int maxPasosBalon = 60;
@@ -710,7 +723,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			proyectorRotY = ProyectorKF[0].rotY;
 			interpolarProyector();
 			playProyector = true;
-			// Reiniciar animación y visibilidad del pizarrón
+			// Reiniciar animación y el pizzaron
 			animarPizarron = false;
 			mostrarPizarron = false; 
 			pasosPizarron = 0;
