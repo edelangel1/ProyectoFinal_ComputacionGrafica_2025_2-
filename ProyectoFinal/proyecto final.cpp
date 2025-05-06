@@ -687,6 +687,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			animacionSillas = true;
 			animacionProyector = true;
 			animacionPizarron = false;
+			animacionHumano = true;
 			camera.SetPosition(glm::vec3(18.5, 8.0, 0));
 			camera.SetFront(glm::normalize(glm::vec3(18.5f, 5.0f, -22.0f) - glm::vec3(18.5, 8.0, 0)));
 		}
@@ -785,12 +786,14 @@ void reiniciar()
 	pizarronRotY = pizKF[0].rotY;
 
 	// Reiniciar humano
+	frameActualHumano = 0;
+	pasoActualInterpolacionHumano = 0;
 	humanoTorsoRot_y = 90.0f;
 	humanoBrazoDerRot_x = humanoBrazoDerRot_y = 0;
 	humanoBrazoIzqRot_x = humanoBrazoIzqRot_y = 0;
 	humanoCabezaRot_x = humanoCabezaRot_y = 0;
 	humanoPiernaRot = 0.0f;
-	humanoPos = glm::vec3(6.6f, 3.15f, -19.0f);
+	interpolarHumano();
 }
 
 // Control general de animacion
