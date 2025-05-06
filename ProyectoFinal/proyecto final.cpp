@@ -22,7 +22,6 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
-
 // Function prototypes
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -37,6 +36,7 @@ void animarPizarronmov();
 void interpolarProyector();
 void animarProyector();
 void animarHumano();
+void interpolarHumano();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -116,7 +116,8 @@ bool animacionPizarron = false;
 bool animacionHumano = false;
 
 
-// ============ Keyframes proyector y pizzaron==============
+// ============ Keyframes==============
+// Proyector
 #define MAX_FRAMES 9
 int i_max_steps = 190;
 int i_curr_steps = 0;
@@ -172,6 +173,136 @@ int maxPasosPizarron = 90;
 float pizarronPosX = 0.0f, pizarronPosY = 0.0f, pizarronPosZ = 0.0f;
 float pizarronRotY = 0.0f;
 
+// Humano
+// Variables de animacion
+int frameActualHumano = 0;
+int pasoActualInterpolacionHumano = 0;
+
+// Estructura de keyframes
+struct KeyFrameHumano
+{
+	float posX, posY, posZ;
+	float torsoRot_y;
+	float cabezaRot_x, cabezaRot_y;
+	float brazoDerRot_x, brazoDerRot_y;
+	float brazoIzqRot_x, brazoIzqRot_y;
+	float piernaRot;
+
+	float segundosAnimacion;
+	int nPasos;
+
+	float incPosX, incPosY, incPosZ;
+	float incTorsoRot_y;
+	float incCabezaRot_x, incCabezaRot_y;
+	float incBrazoDerRot_x, incBrazoDerRot_y;
+	float incBrazoIzqRot_x, incBrazoIzqRot_y;
+	float incPiernaRot;
+};
+KeyFrameHumano humanoKF[] =
+{
+    // x   , y    , z     , torso , cX   , cY   , bDX   , bDY   , bIX  , bIY   , p    , segAnim
+	{  6.5f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 1    },
+	{  6.5f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  6.0f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  5.5f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  5.0f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  4.5f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  4.0f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.5f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -19.0f, 270.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.0f, 3.15f, -19.0f, 160.0f,  0.0f,-30.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 1.5  },
+	{  3.0f, 3.15f, -19.0f, 160.0f,  0.0f,-30.0f,   0.0f,   0.0f,-100.0f,  5.0f,  0.0f, 3    },
+	{  3.0f, 3.15f, -19.0f, 160.0f,  0.0f,-30.0f,   0.0f,   0.0f,-100.0f,  5.0f,  0.0f, 1.5  },
+	{  3.0f, 3.15f, -19.0f, 160.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   5.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f, -30.0f,  -5.0f,-30.0f,   5.0f,  0.0f, 2    },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f,-50.0f, -60.0f,  -5.0f,-30.0f,   5.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f,-50.0f, -60.0f,  -5.0f,-30.0f,   5.0f,  0.0f, 4    },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f, 50.0f, -30.0f,  -5.0f,-60.0f,   5.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f, 50.0f, -30.0f,  -5.0f,-60.0f,   5.0f,  0.0f, 1    },
+	{  3.0f, 3.15f, -19.0f,   0.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.0f, 3.15f, -18.5f,   0.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -18.0f,   0.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -17.5f,   0.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -17.0f,   0.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -16.5f,   0.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -16.0f,   0.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -15.5f,   0.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -15.0f,   0.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -14.5f,   0.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  4.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  4.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  5.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  5.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  6.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  6.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  7.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  7.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  8.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  8.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  9.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  9.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{ 10.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{ 10.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{ 11.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{ 11.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{ 12.0f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{ 12.5f, 3.15f, -14.5f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 4 },
+	{ 12.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 1.5  },
+	{ 12.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{ 11.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{ 11.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{ 10.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{ 10.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  9.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  9.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  8.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  8.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  7.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  7.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  6.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  6.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  5.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  5.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  4.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  4.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.5f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -14.5f, 270.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.0f, 3.15f, -14.5f, 180.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.5  },
+	{  3.0f, 3.15f, -15.0f, 180.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -15.5f, 180.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -16.0f, 180.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -16.5f, 180.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -17.0f, 180.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -17.5f, 180.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -18.0f, 180.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  3.0f, 3.15f, -18.5f, 180.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  3.0f, 3.15f, -19.0f, 180.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 },
+	{  3.5f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  4.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  4.5f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  5.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  5.5f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,  15.0f,   0.0f,-15.0f,   0.0f,-15.0f, 0.75 },
+	{  6.0f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f, -15.0f,   0.0f, 15.0f,   0.0f, 15.0f, 0.75 },
+	{  6.5f, 3.15f, -19.0f,  90.0f,  0.0f,  0.0f,   0.0f,   0.0f,  0.0f,   0.0f,  0.0f, 0.75 }
+};
+int nFramesHumano = sizeof(humanoKF) / sizeof(KeyFrameHumano);
+
+// Variables para transformaciones de los modelos
+glm::vec3 humanoPos(6.5f, 3.15f, -19.0f);
+float humanoTorsoRot_y = 90.0f;
+float humanoCabezaRot_x = 0.0f;
+float humanoCabezaRot_y = 0.0f;
+float humanoBrazoDerRot_x = 0.0f;
+float humanoBrazoDerRot_y = 0.0f;
+float humanoBrazoIzqRot_x = 0.0f;
+float humanoBrazoIzqRot_y = 0.0f;
+float humanoPiernaRot = 0.0f;
+
+
 // estructura modelo silla
 struct Silla
 {
@@ -188,20 +319,10 @@ struct Silla
 //Animacion sillas
 Silla sillas[31];
 
-// Animacion humano
-glm::vec3 humanoPos(6.6f, 3.15f, -19.0f);
-float humanoTorsoRot_y = 90.0f;
-float humanoCabezaRot_x = 0.0f;
-float humanoCabezaRot_y = 0.0f;
-float humanoBrazoDerRot_x = 0.0f;
-float humanoBrazoDerRot_y = 0.0f;
-float humanoBrazoIzqRot_x = 0.0f;
-float humanoBrazoIzqRot_y = 0.0f;
-float humanoPiernaRot = 0.0f;
-
 // Deltatime
-GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
+GLfloat deltaTime;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
+GLfloat currentFrame; // Current frame
 
 int main()
 {
@@ -255,6 +376,7 @@ int main()
 	Model humanoPiernaDer((char*)"Models/humano/piernaDer.obj");
 	Model humanoPiernaIzq((char*)"Models/humano/piernaIzq.obj");
 	Model humanoTorso((char*)"Models/humano/torso.obj");
+	Model iPad((char*)"Models/iPad/iPad.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -286,7 +408,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Calculate deltatime of current frame
-		GLfloat currentFrame = glfwGetTime();
+		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
@@ -367,7 +489,7 @@ int main()
 		view = camera.GetViewMatrix();
 
 		// Carga de modelo 
-		// Salon
+		//Salon
 		glm::mat4 modelSalon(1);
 		modelSalon = glm::mat4(1);
 		modelSalon = glm::rotate(modelSalon, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -420,8 +542,9 @@ int main()
 
 		// Humano
 		float escala = 3.5f;
-		glm::mat4 modelHumanoTemp = glm::mat4(1.0f);
+		glm::mat4 modelHumanoTemp = glm::mat4(1);
 		glm::mat4 modelHumano = glm::mat4(1);
+		glm::mat4 modelHumanoBrazoDer = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 
@@ -447,6 +570,12 @@ int main()
 		modelHumano = glm::rotate(modelHumano, glm::radians(humanoBrazoDerRot_y), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
 		humanoBrazoDer.Draw(lightingShader);
+
+		// iPad
+		modelHumano = glm::translate(modelHumano, glm::vec3(-0.061f, -0.617f, 0.0f));
+		modelHumano = glm::rotate(modelHumano, glm::radians(-77.7f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelHumano));
+		iPad.Draw(lightingShader);
 
 		// Brazo izquierdo
 		modelHumano = modelHumanoTemp;
@@ -597,12 +726,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	{
 		if (!animacionActiva && !animacionHumano)
 		{
-			animacionHumano = true;
+			frameActualHumano = 0;
+			pasoActualInterpolacionHumano = 0;
 			humanoTorsoRot_y = 90.0f;
 			humanoBrazoDerRot_x = humanoBrazoDerRot_y = 0;
 			humanoBrazoIzqRot_x = humanoBrazoIzqRot_y = 0;
 			humanoCabezaRot_x = humanoCabezaRot_y = 0;
 			humanoPiernaRot = 0.0f;
+			interpolarHumano();
+			animacionHumano = true;
 		}
 	}
 }
@@ -1406,7 +1538,52 @@ void animarProyector()
 	}
 }
 
+void interpolarHumano()
+{ 
+	humanoKF[frameActualHumano].nPasos = ceil(humanoKF[frameActualHumano].segundosAnimacion / deltaTime);
+	humanoKF[frameActualHumano].incPosX = (humanoKF[frameActualHumano + 1].posX - humanoKF[frameActualHumano].posX) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incPosY = (humanoKF[frameActualHumano + 1].posY - humanoKF[frameActualHumano].posY) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incPosZ = (humanoKF[frameActualHumano + 1].posZ - humanoKF[frameActualHumano].posZ) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incTorsoRot_y = (humanoKF[frameActualHumano + 1].torsoRot_y - humanoKF[frameActualHumano].torsoRot_y) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incCabezaRot_x = (humanoKF[frameActualHumano + 1].cabezaRot_x - humanoKF[frameActualHumano].cabezaRot_x) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incCabezaRot_y = (humanoKF[frameActualHumano + 1].cabezaRot_y - humanoKF[frameActualHumano].cabezaRot_y) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incBrazoDerRot_x = (humanoKF[frameActualHumano + 1].brazoDerRot_x - humanoKF[frameActualHumano].brazoDerRot_x) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incBrazoDerRot_y = (humanoKF[frameActualHumano + 1].brazoDerRot_y - humanoKF[frameActualHumano].brazoDerRot_y) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incBrazoIzqRot_x = (humanoKF[frameActualHumano + 1].brazoIzqRot_x - humanoKF[frameActualHumano].brazoIzqRot_x) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incBrazoIzqRot_y = (humanoKF[frameActualHumano + 1].brazoIzqRot_y - humanoKF[frameActualHumano].brazoIzqRot_y) / humanoKF[frameActualHumano].nPasos;
+	humanoKF[frameActualHumano].incPiernaRot = (humanoKF[frameActualHumano + 1].piernaRot - humanoKF[frameActualHumano].piernaRot) / humanoKF[frameActualHumano].nPasos;
+}
+
 void animarHumano()
 {
 	if (!animacionHumano) return;
+	if (pasoActualInterpolacionHumano >= humanoKF[frameActualHumano].nPasos)
+	{
+		frameActualHumano++;
+		if (frameActualHumano >= nFramesHumano - 1) 
+		{
+			animacionHumano = false;
+		}
+		else 
+		{
+			pasoActualInterpolacionHumano = 0;
+			interpolarHumano();
+		}
+	}
+	else 
+	{
+		humanoPos.x += humanoKF[frameActualHumano].incPosX;
+		humanoPos.y += humanoKF[frameActualHumano].incPosY;
+		humanoPos.z += humanoKF[frameActualHumano].incPosZ;
+		humanoTorsoRot_y += humanoKF[frameActualHumano].incTorsoRot_y;
+		humanoCabezaRot_x += humanoKF[frameActualHumano].incCabezaRot_x;
+		humanoCabezaRot_y += humanoKF[frameActualHumano].incCabezaRot_y;
+		humanoBrazoDerRot_x += humanoKF[frameActualHumano].incBrazoDerRot_x;
+		humanoBrazoDerRot_y += humanoKF[frameActualHumano].incBrazoDerRot_y;
+		humanoBrazoIzqRot_x += humanoKF[frameActualHumano].incBrazoIzqRot_x;
+		humanoBrazoIzqRot_y += humanoKF[frameActualHumano].incBrazoIzqRot_y;
+		humanoPiernaRot += humanoKF[frameActualHumano].incPiernaRot;
+
+		pasoActualInterpolacionHumano++;
+	}
 }
