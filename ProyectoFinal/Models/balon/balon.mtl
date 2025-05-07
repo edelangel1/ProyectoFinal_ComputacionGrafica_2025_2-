@@ -13,3 +13,14 @@ newmtl wire_204204204
 	map_Kd Soccerball_Base.png
 	map_Ks Soccerball_Metallic.png
 	map_Bump Soccerball_Normal.png
+
+
+newmtl wire_216226162
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.8471 0.8863 0.6353
+	Kd 0.8471 0.8863 0.6353
+	Ks 0.3500 0.3500 0.3500
