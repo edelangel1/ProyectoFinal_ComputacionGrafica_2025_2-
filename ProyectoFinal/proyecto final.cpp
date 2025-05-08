@@ -40,7 +40,6 @@ void interpolarProyector();
 void animarProyector();
 void animarHumano();
 void interpolarHumano();
-void animacionSilla();
 //void interpolarProyector(); 
 
 
@@ -614,7 +613,7 @@ int main()
 		DoMovement();
 		// Animaciones
 		animacion();
-		animacionSilla();
+		animarSilla();
 		animarProyector();
 		animarPizarronmov();
 		animarHumano();
@@ -912,9 +911,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (key == GLFW_KEY_N)
 	{
-		if (!animacionActiva)
+		if (!animacionActiva && !animacionSillas)
 		{
-			animacionActiva = true;
+			inicializarSillas();
+			animacionSillas = true;
 		}
 	}
 	if (key == GLFW_KEY_R)
@@ -1074,7 +1074,7 @@ void reiniciar()
 void animacion()
 {
 	if (!animacionActiva) return;
-	animacionSilla();
+	
 	controlCamara();
 
 	// Verificar si ya terminaron todas las animaciones
@@ -1217,7 +1217,8 @@ void inicializarSillas()
 }
 
 // Animaciones
-void animacionSilla() {
+void animarSilla() {
+	if (!animacionSillas) return;
 	// Limites de las sillas
 	float x1 = 3.5f;
 	float x2 = 21.0f;
