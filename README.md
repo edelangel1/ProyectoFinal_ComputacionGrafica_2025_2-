@@ -1,7 +1,7 @@
-# 🧠 Proyecto Final - Computación Gráfica e Interacción Humano-Computadora (CGIH) 2025-2
+# 🧠 Proyecto Final - Laboratorio de Computación Gráfica e Interacción Humano-Computadora (CGIH) 2025-2
 
-Bienvenido al repositorio del proyecto final de la materia de Computación Gráfica Interacción Humano-Computadora 2025-2.  
-Este proyecto consiste en el desarrollo de un **recorrido virtual** del iOS Development Lab de la Facultad de Ingeniería de la UNAM, destacando sus áreas, equipamiento y oportunidades de patrocinio.
+Bienvenido al repositorio del proyecto final para el laboratorio de CGIH 2025-2.  
+Este proyecto consiste en el desarrollo de un **recorrido virtual interactivo** de los laboratorios de cómputo de la Facultad de Ingeniería, destacando sus áreas, equipamiento y oportunidades de patrocinio.
 
 ---
 
@@ -21,7 +21,7 @@ Diseñar una experiencia inmersiva que:
 - ✅ Modelado 3D (exterior e interior del laboratorio)
 - ✅ Texturizado con coherencia visual
 - ✅ Recorrido virtual interactivo
-- ✅ Cinco animaciones complejas (dos con técnica de KeyFrames)
+- ✅ Dos animaciones complejas (una con técnica de KeyFrames)
 - ✅ Espacios publicitarios visuales y no invasivos
 - ✅ Documentación técnica y manual de usuario
 - ✅ Redacción individual en inglés sobre la experiencia
@@ -35,6 +35,6 @@ Diseñar una experiencia inmersiva que:
 - Librerías: **OpenGL**, **GLFW**, **GLEW**, **GLM**, **SOIL2**
 - Modelado: **Blender**
 - Colaboración: **Trello**, **GitHub**
-- Entorno de desarrollo: **Visual Studio, Visual Studio Code**
+- Entorno de desarrollo: **Visual Studio**
 
 ---
