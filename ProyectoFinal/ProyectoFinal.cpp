@@ -229,7 +229,8 @@ const glm::vec3 posicionesComputadoras[10] = {
 	glm::vec3(15.5f * escala, posComputadorasY, -13.5f * escala)  // Mesa 6
 };
 
-// ----------------- Animacion del salon ----------------- //
+// ----------------- Animación del salón ----------------- //
+
 // Estados para objetos (sillas y computadoras)
 enum EstadoObjetos
 {
@@ -245,6 +246,8 @@ float dissolveAmountObjetos = 0.0f;
 float tiempoEsperaObjetos = 0.0f;
 bool animacionSalonIniciada = false;
 GLuint noiseTexture;
+
+// Salón, Excavadora, Helicóptero
 
 // Estados de animación para el salón
 enum AnimationState
@@ -263,22 +266,45 @@ float animationTimer = 0.0f;
 bool animationActive = false;
 bool salonCayendo = false;
 
-// Posiciones y escalas para los modelos
+// Posiciones y escalas para el salón
 glm::vec3 oldSalonPosition = glm::vec3(0.0f, 0.0f, 0.0f);  // Posición inicial del salón viejo
 glm::vec3 oldSalonScale = glm::vec3(1.0f);				   // Escala inicial del salón viejo
 glm::vec3 newSalonPosition = glm::vec3(50.0f, 5.0f, 0.0f); // Posición inicial del salón nuevo (fuera de vista)
 glm::vec3 newSalonScale = glm::vec3(0.4f);				   // Escala inicial del salón nuevo
 glm::vec3 newSalonFallScale = glm::vec3(0.07);
-glm::vec3 bulldozerPosition = glm::vec3(-30.5f, -0.5f, -9.0f); // Posición inicial del bulldozer (fuera de vista)
-glm::vec3 helicopterPosition = glm::vec3(30.0f, 10.0f, -9.0f); // Posición inicial del helicóptero (fuera de vista)
+
+// Posición inicial del bulldozer (fuera de vista)
+glm::vec3 bulldozerBasePosition = glm::vec3(-30.5f, -0.3f, -9.0f);
+glm::vec3 bulldozerBelt1Position = glm::vec3(-2.6f, 2.0f, 3.7);
+glm::vec3 bulldozerBelt2Position = glm::vec3(-2.6f, 2.0f, -3.5);
+glm::vec3 bulldozerBelt3Position = glm::vec3(-2.6f, 2.0f, -3.7f);
+glm::vec3 bulldozerBelt4Position = glm::vec3(-2.6f, 2.0f, 3.5f);
+
+// Posición inicial del helicóptero (fuera de vista)
+glm::vec3 helicopterBasePosition = glm::vec3(30.0f, 10.0f, -9.0f); 
+glm::vec3 mainRotorOffset(0.0f, 3.615f, 5.15f);
+glm::vec3 tailRotorOffset(0.0f, 4.34f, -4.3f);
+
+// Velocidades y otros parámetros del helicóptero
 float helicopterSpeed = 7.0f;								   // Velocidad del helicóptero
 bool helicopterVisible = false;								   // Inicialmente, el helicóptero no es visible
+float helicopterRotationY = 270.0f;
 bool oldSalonVisible = true;
 bool newSalonVisible = false;
 bool bulldozerVisible = false;
 bool salonEmpezoAMoverse = false;
 bool hasLanded = false;
 float landingTimer = 0.0f;
+
+// Rotación de la excavadora
+float beltRotationAngle = 0.0f;
+float beltRotationSpeed = 100.0f;
+
+// Rotacion de las helices
+float mainRotorAngle = 0.0;
+float tailRotorAngle = 0.0f;
+float mainRotorSpeed = 900.0f;
+float tailRotorSpeed = 900.0f; 
 
 // Variables para el efecto de rebote
 float bounceHeight = 0.0f;
@@ -475,8 +501,11 @@ int main()
 	// Animación del salon
 	Model salonViejo((char *)"Models/salon/EstructuraVieja.obj");
 	Model salonNuevo((char *)"Models/salon/Estructura.obj");
-	Model bulldozer((char *)"Models/Bulldozer/Bulldozer.obj");
-	Model helicopter((char *)"Models/Helicoptero/Helicoptero.obj");
+	Model bulldozerBase((char *)"Models/Bulldozer/Bulldozer.obj");
+	Model bulldozerBelt((char *)"Models/Bulldozer/bulldozerLlanta.obj");
+	Model helicopterBase((char *)"Models/Helicoptero/helicopterBase.obj");
+	Model helicopterRotorMain((char *)"Models/Helicoptero/RotorMain.obj");
+	Model helicopterRotorTail((char *)"Models/Helicoptero/RotorTail.obj");
 
 	// Animación de las sillas
 	Model sillaVieja((char *)"Models/sillaVieja/sillaVieja.obj");
@@ -969,26 +998,86 @@ int main()
 			salonNuevo.Draw(lightingShader);
 		}
 
-		// Bulldozer
+		// Excavadora (Bulldozer)
 		if (bulldozerVisible)
 		{
+			// Base del bulldozer
 			model = glm::mat4(1);
-			model = glm::translate(model, bulldozerPosition);
+			model = glm::translate(model, bulldozerBasePosition);
 			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(2.0f));
+			model = glm::scale(model, glm::vec3(1.5f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			bulldozer.Draw(lightingShader);
+			bulldozerBase.Draw(lightingShader);
+
+			// Llanta 1
+			model = glm::mat4(1);
+			model = glm::translate(model, bulldozerBasePosition);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(model, bulldozerBelt1Position);									 
+			model = glm::rotate(model, glm::radians(beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación en X
+			model = glm::scale(model, glm::vec3(1.5f));
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			bulldozerBelt.Draw(lightingShader);
+
+			// Llanta 2
+			model = glm::mat4(1);
+			model = glm::translate(model, bulldozerBasePosition);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(model, bulldozerBelt2Position);									
+			model = glm::rotate(model, glm::radians(beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.5f));
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			bulldozerBelt.Draw(lightingShader);
+
+			// Llanta 3
+			model = glm::mat4(1);
+			model = glm::translate(model, bulldozerBasePosition);
+			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(model, bulldozerBelt3Position);									
+			model = glm::rotate(model, glm::radians(-beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.5f));
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			bulldozerBelt.Draw(lightingShader);
+
+			// Llanta 4
+			model = glm::mat4(1);
+			model = glm::translate(model, bulldozerBasePosition);
+			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(model, bulldozerBelt4Position);									
+			model = glm::rotate(model, glm::radians(-beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.5f));
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			bulldozerBelt.Draw(lightingShader);
+
 		}
 
-		// Helicopter
+		// Helicoptero
 		if (helicopterVisible)
 		{
-			model = glm::mat4(1);
-			model = glm::translate(model, helicopterPosition);
-			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			// Base del helicóptero
+			glm::mat4 helicopterBaseModel = glm::mat4(1.0f);
+			helicopterBaseModel = glm::translate(helicopterBaseModel, helicopterBasePosition);
+			helicopterBaseModel = glm::rotate(helicopterBaseModel, glm::radians(helicopterRotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			// Base del helicóptero
+			glm::mat4 model = helicopterBaseModel;
 			model = glm::scale(model, glm::vec3(1.0f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			helicopter.Draw(lightingShader);
+			helicopterBase.Draw(lightingShader);
+
+			// Hélice principal (main rotor)
+			glm::mat4 rotorModel = helicopterBaseModel;														 // Partimos de la transformación base
+			rotorModel = glm::translate(rotorModel, mainRotorOffset);										 // Aplicamos el offset relativo
+			rotorModel = glm::rotate(rotorModel, glm::radians(mainRotorAngle), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación de la hélice
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(rotorModel));
+			helicopterRotorMain.Draw(lightingShader);
+
+			// Hélice de cola (tail rotor)
+			glm::mat4 tailModel = helicopterBaseModel;													   // Partimos de la transformación base
+			tailModel = glm::translate(tailModel, tailRotorOffset);										   // Aplicamos el offset relativo
+			tailModel = glm::rotate(tailModel, glm::radians(tailRotorAngle), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación de la hélice
+			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(tailModel));
+			helicopterRotorTail.Draw(lightingShader);
 		}
 
 		// ------------------------------------------------------- //
@@ -1003,18 +1092,18 @@ int main()
 		// Set matrices
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		//model = glm::mat4(1);
-		//model = glm::translate(model, lightPos);
-		//model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		model = glm::mat4(1);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
 
 		model = glm::mat4(1);
 		model = glm::translate(model, pointLightPositions[0]);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		/*glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);*/
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 
@@ -1145,6 +1234,17 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			humanoDisolviendo = true;
 			dissolveAmountHumano = 0.0f;
 		}
+	}
+
+	// Manejar tecla 'B'
+	if (key == GLFW_KEY_B && action == GLFW_PRESS)
+	{
+		if (currentState == FINAL)
+		{
+			// Reiniciar la escena solo si estamos en el estado final
+			ResetScene();
+		}
+		// No hacer nada si el salón visible es el viejo
 	}
 
 	// Iniciar animación del humano
@@ -2185,9 +2285,16 @@ void UpdateAnimation(float deltaTime)
 	case MOVING_OUT:
 	{
 		float moveSpeed = 8.0f * deltaTime;
-		bulldozerPosition.x += moveSpeed;
 
-		if (bulldozerPosition.x >= -10.5f)
+		// Mover la base del bulldozer
+		bulldozerBasePosition.x += moveSpeed;
+
+		// Rotar las cintas
+		beltRotationAngle += beltRotationSpeed * deltaTime;
+		if (beltRotationAngle > 360.0f)
+			beltRotationAngle -= 360.0f;
+
+		if (bulldozerBasePosition.x >= -10.5f)
 		{
 			salonEmpezoAMoverse = true;
 		}
@@ -2204,8 +2311,7 @@ void UpdateAnimation(float deltaTime)
 			helicopterVisible = true; // El helicóptero se vuelve visible
 			currentState = HELICOPTER_MOVING;
 			animationTimer = 0.0f;
-			// El salón nuevo no es visible todavía
-			newSalonVisible = false; // No visible aún
+			newSalonVisible = false;
 		}
 	}
 	break;
@@ -2213,11 +2319,11 @@ void UpdateAnimation(float deltaTime)
 	case HELICOPTER_MOVING:
 	{
 		// Movimiento del helicóptero (siempre se actualiza)
-		helicopterPosition.x -= helicopterSpeed * deltaTime;
-		helicopterPosition.y = 10.0f + 3.0f * sin(helicopterPosition.x / 10.0f);
+		helicopterBasePosition.x -= helicopterSpeed * deltaTime;
+		helicopterBasePosition.y = 10.0f + 3.0f * sin(helicopterBasePosition.x / 10.0f);
 
 		// Cuando el helicóptero pasa por (0,0,0), activar la caída del salón
-		if (helicopterPosition.x <= 0.0f && !newSalonVisible)
+		if (helicopterBasePosition.x <= 0.0f && !newSalonVisible)
 		{
 			salonCayendo = true;
 			newSalonVisible = true;
@@ -2230,23 +2336,20 @@ void UpdateAnimation(float deltaTime)
 		}
 
 		// El helicóptero desaparece cuando sale completamente de escena
-		if (helicopterPosition.x <= -50.0f)
+		if (helicopterBasePosition.x <= -50.0f)
 		{
 			helicopterVisible = false;
 		}
-
-		// Continuamos en este estado hasta que el salón termine de caer
-		// (el movimiento del helicóptero sigue actualizándose en NEW_FALLING)
 	}
 	break;
 
 	case NEW_FALLING:
 	{
 		// Actualizar posición del helicóptero (movimiento continuo)
-		helicopterPosition.x -= helicopterSpeed * deltaTime;
-		helicopterPosition.y = 10.0f + 3.0f * sin(helicopterPosition.x / 10.0f);
+		helicopterBasePosition.x -= helicopterSpeed * deltaTime;
+		helicopterBasePosition.y = 10.0f + 3.0f * sin(helicopterBasePosition.x / 10.0f);
 
-		if (helicopterPosition.x <= -50.0f)
+		if (helicopterBasePosition.x <= -50.0f)
 		{
 			helicopterVisible = false;
 		}
@@ -2315,14 +2418,31 @@ void UpdateAnimation(float deltaTime)
 		// Continuar moviendo el helicóptero hasta que desaparezca
 		if (helicopterVisible)
 		{
-			helicopterPosition.x -= helicopterSpeed * deltaTime;
-			if (helicopterPosition.x <= -50.0f)
+			// Movimiento horizontal
+			helicopterBasePosition.x -= helicopterSpeed * deltaTime;
+			
+			// Efecto de flotación suave
+			helicopterBasePosition.y = 10.0f + 1.5f * sin(glfwGetTime() * 2.0f);
+
+			// Desaparecer cuando sale de escena
+			if (helicopterBasePosition.x <= -50.0f)
 			{
 				helicopterVisible = false;
 			}
 		}
 	}
 	break;
+	}
+
+	if (helicopterVisible)
+	{
+		mainRotorAngle += mainRotorSpeed * deltaTime;
+		if (mainRotorAngle > 360.0f)
+			mainRotorAngle -= 360.0f;
+
+		tailRotorAngle += tailRotorSpeed * deltaTime;
+		if (tailRotorAngle > 360.0f)
+			tailRotorAngle -= 360.0f;
 	}
 }
 
@@ -2339,9 +2459,17 @@ void ResetScene()
 	oldSalonScale = glm::vec3(1.0f);
 	newSalonPosition = glm::vec3(50.0f, 5.0f, 0.0f); // Fuera de la vista
 	newSalonScale = glm::vec3(0.4f);
-	bulldozerPosition = glm::vec3(-30.5f, -0.5f, -9.0f);
-	helicopterPosition = glm::vec3(30.0f, 10.0f, -9.0f);
-
+	bulldozerBasePosition = glm::vec3(-30.5f, -0.5f, -9.0f);
+	bulldozerBelt1Position = glm::vec3(-2.6f, 2.0f, 3.7);	
+	bulldozerBelt2Position = glm::vec3(-2.6f, 2.0f, -3.5);	
+	bulldozerBelt3Position = glm::vec3(-2.6f, 2.0f, -3.7f);
+	bulldozerBelt4Position = glm::vec3(-2.6f, 2.0f, 3.5f);
+	helicopterBasePosition = glm::vec3(30.0f, 10.0f, -9.0f);
+	beltRotationAngle = 0.0f;
+	helicopterRotationY = 270.0f;
+	mainRotorAngle = 0.0f;
+	tailRotorAngle = 0.0f;
+	
 	// Restablecer visibilidad
 	oldSalonVisible = true;
 	newSalonVisible = false;
