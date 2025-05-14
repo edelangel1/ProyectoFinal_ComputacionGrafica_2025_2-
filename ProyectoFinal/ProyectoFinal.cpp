@@ -27,6 +27,11 @@
 #include "Model.h"
 #include "Texture.h"
 
+// Music
+#include <Windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+
 // ----------------- Function prototypes ----------------- //
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow *window, double xPos, double yPos);
@@ -57,6 +62,9 @@ void reiniciar();
 void animacion();
 void controlCamara();
 // ------------------------------------------------------- //
+
+// Music
+bool isPlaying = false;
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -1103,7 +1111,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 
@@ -1236,7 +1244,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		}
 	}
 
-	// Manejar tecla 'B'
+	// Reiniciar animacion del salón
 	if (key == GLFW_KEY_B && action == GLFW_PRESS)
 	{
 		if (currentState == FINAL)
@@ -1263,6 +1271,19 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			animacionHumano = true;
 		}
 	}
+
+	// Reproducir musica
+	if (action == GLFW_PRESS && key == GLFW_KEY_G && !isPlaying)
+	{
+		PlaySound(TEXT("just-relax-11157.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+		isPlaying = true;
+	}
+	else if (action == GLFW_PRESS && key == GLFW_KEY_O && isPlaying)
+	{
+		PlaySound(NULL, 0, 0); // Detiene la reproducción
+		isPlaying = false;
+	}
+
 }
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
