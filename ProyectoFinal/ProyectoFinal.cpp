@@ -33,8 +33,8 @@
 #pragma comment(lib, "winmm.lib")
 
 // ----------------- Function prototypes ----------------- //
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow *window, double xPos, double yPos);
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 
 // Sillas
@@ -56,11 +56,6 @@ void reiniciarObjetos();
 // Humano
 void animarHumano();
 void interpolarHumano();
-
-// Animacion
-void reiniciar();
-void animacion();
-void controlCamara();
 // ------------------------------------------------------- //
 
 // Music
@@ -91,7 +86,7 @@ glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 2.0f, 0.0f),
 	glm::vec3(0.0f, 0.0f, 0.0f),
 	glm::vec3(0.0f, 0.0f, 0.0f),
-	glm::vec3(0.0f, 0.0f, 0.0f)};
+	glm::vec3(0.0f, 0.0f, 0.0f) };
 
 float vertices[] = {
 	-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
@@ -134,7 +129,7 @@ float vertices[] = {
 	0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-	-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f};
+	-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f };
 
 glm::vec3 Light1 = glm::vec3(0);
 
@@ -289,13 +284,13 @@ glm::vec3 bulldozerBelt3Position = glm::vec3(-2.6f, 2.0f, -3.7f);
 glm::vec3 bulldozerBelt4Position = glm::vec3(-2.6f, 2.0f, 3.5f);
 
 // Posición inicial del helicóptero (fuera de vista)
-glm::vec3 helicopterBasePosition = glm::vec3(30.0f, 10.0f, -9.0f); 
+glm::vec3 helicopterBasePosition = glm::vec3(30.0f, 10.0f, -9.0f);
 glm::vec3 mainRotorOffset(0.0f, 3.615f, 5.15f);
 glm::vec3 tailRotorOffset(0.0f, 4.34f, -4.3f);
 
 // Velocidades y otros parámetros del helicóptero
-float helicopterSpeed = 7.0f;								   // Velocidad del helicóptero
-bool helicopterVisible = false;								   // Inicialmente, el helicóptero no es visible
+float helicopterSpeed = 7.0f;	// Velocidad del helicóptero
+bool helicopterVisible = false; // Inicialmente, el helicóptero no es visible
 float helicopterRotationY = 270.0f;
 bool oldSalonVisible = true;
 bool newSalonVisible = false;
@@ -312,7 +307,7 @@ float beltRotationSpeed = 100.0f;
 float mainRotorAngle = 0.0;
 float tailRotorAngle = 0.0f;
 float mainRotorSpeed = 900.0f;
-float tailRotorSpeed = 900.0f; 
+float tailRotorSpeed = 900.0f;
 
 // Variables para el efecto de rebote
 float bounceHeight = 0.0f;
@@ -441,7 +436,7 @@ KeyFrameHumano humanoKF[] = {
 	{5.0f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, -15.0f, 0.0f, 15.0f, 0.0f, 15.0f, 0.75},
 	{5.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 15.0f, 0.0f, -15.0f, 0.0f, -15.0f, 0.75},
 	{6.0f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, -15.0f, 0.0f, 15.0f, 0.0f, 15.0f, 0.75},
-	{6.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.75}};
+	{6.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.75} };
 int nFramesHumano = sizeof(humanoKF) / sizeof(KeyFrameHumano);
 
 // Variables para transformaciones de los modelos
@@ -467,7 +462,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "iOS Development Lab - Equipo 10", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "iOS Development Lab - Equipo 10", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -507,30 +502,30 @@ int main()
 
 	// Load models
 	// Animación del salon
-	Model salonViejo((char *)"Models/salon/EstructuraVieja.obj");
-	Model salonNuevo((char *)"Models/salon/Estructura.obj");
-	Model bulldozerBase((char *)"Models/Bulldozer/Bulldozer.obj");
-	Model bulldozerBelt((char *)"Models/Bulldozer/bulldozerLlanta.obj");
-	Model helicopterBase((char *)"Models/Helicoptero/helicopterBase.obj");
-	Model helicopterRotorMain((char *)"Models/Helicoptero/RotorMain.obj");
-	Model helicopterRotorTail((char *)"Models/Helicoptero/RotorTail.obj");
+	Model salonViejo((char*)"Models/salon/EstructuraVieja.obj");
+	Model salonNuevo((char*)"Models/salon/Estructura.obj");
+	Model bulldozerBase((char*)"Models/Bulldozer/Bulldozer.obj");
+	Model bulldozerBelt((char*)"Models/Bulldozer/bulldozerLlanta.obj");
+	Model helicopterBase((char*)"Models/Helicoptero/helicopterBase.obj");
+	Model helicopterRotorMain((char*)"Models/Helicoptero/RotorMain.obj");
+	Model helicopterRotorTail((char*)"Models/Helicoptero/RotorTail.obj");
 
 	// Animación de las sillas
-	Model sillaVieja((char *)"Models/sillaVieja/sillaVieja.obj");
-	Model sillaNueva((char *)"Models/sillaNueva/sillaNueva.obj");
+	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
+	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
 
 	// Animación de las computadoras
-	Model computadoraVieja((char *)"Models/compuVieja/compuVieja.obj");
-	Model computadoraNueva((char *)"Models/compuNueva/compuNueva.obj");
+	Model computadoraVieja((char*)"Models/compuVieja/compuVieja.obj");
+	Model computadoraNueva((char*)"Models/compuNueva/compuNueva.obj");
 
 	// Animación del humano
-	Model humanoBrazoDer((char *)"Models/humano/brazoDer.obj");
-	Model humanoBrazoIzq((char *)"Models/humano/brazoIzq.obj");
-	Model humanoCabeza((char *)"Models/humano/cabeza.obj");
-	Model humanoPiernaDer((char *)"Models/humano/piernaDer.obj");
-	Model humanoPiernaIzq((char *)"Models/humano/piernaIzq.obj");
-	Model humanoTorso((char *)"Models/humano/torso.obj");
-	Model iPad((char *)"Models/iPad/iPad.obj");
+	Model humanoBrazoDer((char*)"Models/humano/brazoDer.obj");
+	Model humanoBrazoIzq((char*)"Models/humano/brazoIzq.obj");
+	Model humanoCabeza((char*)"Models/humano/cabeza.obj");
+	Model humanoPiernaDer((char*)"Models/humano/piernaDer.obj");
+	Model humanoPiernaIzq((char*)"Models/humano/piernaIzq.obj");
+	Model humanoTorso((char*)"Models/humano/torso.obj");
+	Model iPad((char*)"Models/iPad/iPad.obj");
 
 	// ------------------------------------------------------- //
 	GLfloat skyboxVertices[] = {
@@ -575,7 +570,7 @@ int main()
 		1.0f, -1.0f, -1.0f,
 		1.0f, -1.0f, -1.0f,
 		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f};
+		1.0f, -1.0f, 1.0f };
 
 	GLuint indices[] = {// Note that we start from 0!
 						0, 1, 2, 3,
@@ -586,7 +581,7 @@ int main()
 						20, 21, 22, 23,
 						24, 25, 26, 27,
 						28, 29, 30, 31,
-						32, 33, 34, 35};
+						32, 33, 34, 35 };
 	//------------------
 
 	// First, set the container's VAO (and VBO)
@@ -603,10 +598,10 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	// Set texture units
@@ -623,10 +618,10 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
 	// Load textures
-	vector<const GLchar *> faces;
+	vector<const GLchar*> faces;
 	faces.push_back("SkyBox/px.png"); // +X
 	faces.push_back("SkyBox/nx.png"); // -X
 	faces.push_back("SkyBox/py.png"); // +Y
@@ -1021,7 +1016,7 @@ int main()
 			model = glm::mat4(1);
 			model = glm::translate(model, bulldozerBasePosition);
 			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::translate(model, bulldozerBelt1Position);									 
+			model = glm::translate(model, bulldozerBelt1Position);
 			model = glm::rotate(model, glm::radians(beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación en X
 			model = glm::scale(model, glm::vec3(1.5f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1031,8 +1026,8 @@ int main()
 			model = glm::mat4(1);
 			model = glm::translate(model, bulldozerBasePosition);
 			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::translate(model, bulldozerBelt2Position);									
-			model = glm::rotate(model, glm::radians(beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::translate(model, bulldozerBelt2Position);
+			model = glm::rotate(model, glm::radians(beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.5f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 			bulldozerBelt.Draw(lightingShader);
@@ -1041,7 +1036,7 @@ int main()
 			model = glm::mat4(1);
 			model = glm::translate(model, bulldozerBasePosition);
 			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::translate(model, bulldozerBelt3Position);									
+			model = glm::translate(model, bulldozerBelt3Position);
 			model = glm::rotate(model, glm::radians(-beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.5f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1051,12 +1046,11 @@ int main()
 			model = glm::mat4(1);
 			model = glm::translate(model, bulldozerBasePosition);
 			model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::translate(model, bulldozerBelt4Position);									
-			model = glm::rotate(model, glm::radians(-beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::translate(model, bulldozerBelt4Position);
+			model = glm::rotate(model, glm::radians(-beltRotationAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.5f));
 			glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 			bulldozerBelt.Draw(lightingShader);
-
 		}
 
 		// Helicoptero
@@ -1111,7 +1105,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		// glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 
@@ -1166,7 +1160,7 @@ void DoMovement()
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -1185,35 +1179,31 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		}
 	}
 
-	// Reiniciar animaciones
-	if (key == GLFW_KEY_R)
-	{
-		reiniciar();
-	}
-
-	// Iniciar todas las animaciones
-	// if (key == GLFW_KEY_Z)
-	// {
-	// 	if (!animacionActiva)
-	// 	{
-	// 		reiniciar();
-	// 		animacionActiva = true;
-	// 		animacionSillas = true;
-	// 		animacionProyector = true;
-	// 		animacionPizarron = false;
-	// 		camera.SetPosition(glm::vec3(18.5, 8.0, 0));
-	// 		camera.SetFront(glm::normalize(glm::vec3(18.5f, 5.0f, -22.0f) - glm::vec3(18.5, 8.0, 0)));
-	// 	}
-	// }
-
 	// Iniciar animacion de las sillas
-	if (key == GLFW_KEY_N)
+	if (key == GLFW_KEY_N && action == GLFW_PRESS)
 	{
-		if (!animacionActiva && !animacionSillas)
+		bool haySillasViejas = false;
+		for (size_t i = 0; i < 31; i++)
+		{
+			if (!sillas[i].sillaNueva && sillas[i].dibujar)
+			{
+				haySillasViejas = true;
+				break;
+			}
+		}
+
+		if (haySillasViejas && !animacionSillas)
 		{
 			inicializarSillas();
 			animacionSillas = true;
 		}
+	}
+
+	// Reiniciar animación de sillas
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+	{
+		inicializarSillas();
+		animacionSillas = false;
 	}
 
 	// Iniciar animacion de las computadoras
@@ -1272,6 +1262,20 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		}
 	}
 
+	// Reiniciar animación del humano
+	if (key == GLFW_KEY_L && action == GLFW_PRESS)
+	{
+		frameActualHumano = 0;
+		pasoActualInterpolacionHumano = 0;
+		humanoPos = glm::vec3(6.5f, 3.15f, -19.0f);
+		humanoTorsoRot_y = 90.0f;
+		humanoBrazoDerRot_x = humanoBrazoDerRot_y = 0;
+		humanoBrazoIzqRot_x = humanoBrazoIzqRot_y = 0;
+		humanoCabezaRot_x = humanoCabezaRot_y = 0;
+		humanoPiernaRot = 0.0f;
+		animacionHumano = false;
+	}
+
 	// Reproducir musica
 	if (action == GLFW_PRESS && key == GLFW_KEY_G && !isPlaying)
 	{
@@ -1283,10 +1287,9 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		PlaySound(NULL, 0, 0); // Detiene la reproducción
 		isPlaying = false;
 	}
-
 }
 
-void MouseCallback(GLFWwindow *window, double xPos, double yPos)
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
@@ -1303,29 +1306,6 @@ void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
 }
-
-// Reiniciar la simulacion
-void reiniciar()
-{
-	animacionActiva = false;
-	animacionSillas = false;
-	animacionProyector = false;
-	animacionPizarron = false;
-	inicializarSillas();
-}
-
-// Control general de animacion
-// void animacion()
-// {
-
-// }
-
-// Control de la camara
-// void controlCamara()
-// {
-// 	float radioMayor = 19.0;
-
-// }
 
 // Inicializa las sillas
 void inicializarSillas()
@@ -1374,7 +1354,7 @@ void inicializarSillas()
 		// sillas mesa 10
 		glm::vec3(posSillasX19_30, posSillasY, -9.84f),
 		glm::vec3(posSillasX19_30, posSillasY, -7.54f),
-		glm::vec3(posSillasX19_30, posSillasY, -5.24f)};
+		glm::vec3(posSillasX19_30, posSillasY, -5.24f) };
 	float anguloSillas[] = {
 		// silla profesor
 		180.0f,
@@ -1397,7 +1377,7 @@ void inicializarSillas()
 		// sillas mesa 9
 		0.0f, 0.0f, 0.0f,
 		// sillas mesa 10
-		0.0f, 0.0f, 0.0f};
+		0.0f, 0.0f, 0.0f };
 	int estadoAnimacion[] = {
 		// silla profesor
 		1,
@@ -1420,7 +1400,7 @@ void inicializarSillas()
 		// sillas mesa 9
 		12, 12, 12,
 		// sillas mesa 10
-		12, 12, 12};
+		12, 12, 12 };
 
 	for (size_t i = 0; i < 31; i++)
 	{
@@ -1997,7 +1977,7 @@ void animacionComputadora()
 		return;
 	for (int i = 0; i < NUMERO_COMPUTADORAS; ++i)
 	{
-		Computadora &comp = computadoras[i];
+		Computadora& comp = computadoras[i];
 		comp.tiempoEstado += deltaTime;
 		if (!comp.computadoraNueva)
 		{
@@ -2200,73 +2180,73 @@ void cargarTexturaRuido()
 
 void manejarObjetos(float deltaTime)
 {
-    // Manejar disolución del humano
-    if (humanoDisolviendo)
-    {
-        dissolveAmountHumano += deltaTime * 1.5f;
-        if (dissolveAmountHumano >= 1.0f)
-        {
-            dissolveAmountHumano = 1.0f;
-            humanoDisolviendo = false;
-        }
-    }
-    else if (humanoReapareciendo)
-    {
-        dissolveAmountHumano -= deltaTime * 1.5f;
-        if (dissolveAmountHumano <= 0.0f)
-        {
-            dissolveAmountHumano = 0.0f;
-            humanoReapareciendo = false;
-        }
-    }
+	// Manejar disolución del humano
+	if (humanoDisolviendo)
+	{
+		dissolveAmountHumano += deltaTime * 1.5f;
+		if (dissolveAmountHumano >= 1.0f)
+		{
+			dissolveAmountHumano = 1.0f;
+			humanoDisolviendo = false;
+		}
+	}
+	else if (humanoReapareciendo)
+	{
+		dissolveAmountHumano -= deltaTime * 1.5f;
+		if (dissolveAmountHumano <= 0.0f)
+		{
+			dissolveAmountHumano = 0.0f;
+			humanoReapareciendo = false;
+		}
+	}
 
-    switch (estadoObjetos)
-    {
-    case OBJETOS_VISIBLES:
-        break;
+	switch (estadoObjetos)
+	{
+	case OBJETOS_VISIBLES:
+		break;
 
-    case OBJETOS_DISOLVIENDO:
-        dissolveAmountObjetos += deltaTime * 1.5f;
+	case OBJETOS_DISOLVIENDO:
+		dissolveAmountObjetos += deltaTime * 1.5f;
 
-        if (dissolveAmountObjetos >= 1.0f)
-        {
-            dissolveAmountObjetos = 1.0f;
-            estadoObjetos = OBJETOS_ESPERANDO;
-            // Iniciar animación del salón
-            animationActive = true;
-            currentState = SHRINKING;
-            animationTimer = 0.0f;
-        }
-        break;
+		if (dissolveAmountObjetos >= 1.0f)
+		{
+			dissolveAmountObjetos = 1.0f;
+			estadoObjetos = OBJETOS_ESPERANDO;
+			// Iniciar animación del salón
+			animationActive = true;
+			currentState = SHRINKING;
+			animationTimer = 0.0f;
+		}
+		break;
 
-    case OBJETOS_ESPERANDO:
-        // Esperar a que la animación del salón termine
-        if (currentState == FINAL)
-        {
-            tiempoEsperaObjetos += deltaTime;
+	case OBJETOS_ESPERANDO:
+		// Esperar a que la animación del salón termine
+		if (currentState == FINAL)
+		{
+			tiempoEsperaObjetos += deltaTime;
 
-            // Esperar 2 segundos antes de reaparecer
-            if (tiempoEsperaObjetos >= 2.0f)
-            {
-                estadoObjetos = OBJETOS_REAPARECIENDO;
-                humanoReapareciendo = true;
-            }
-        }
-        break;
+			// Esperar 2 segundos antes de reaparecer
+			if (tiempoEsperaObjetos >= 2.0f)
+			{
+				estadoObjetos = OBJETOS_REAPARECIENDO;
+				humanoReapareciendo = true;
+			}
+		}
+		break;
 
-    case OBJETOS_REAPARECIENDO:
-        dissolveAmountObjetos -= deltaTime * 1.5f;
+	case OBJETOS_REAPARECIENDO:
+		dissolveAmountObjetos -= deltaTime * 1.5f;
 
-        if (dissolveAmountObjetos <= 0.0f)
-        {
-            dissolveAmountObjetos = 0.0f;
-            estadoObjetos = OBJETOS_COMPLETO;
-        }
-        break;
+		if (dissolveAmountObjetos <= 0.0f)
+		{
+			dissolveAmountObjetos = 0.0f;
+			estadoObjetos = OBJETOS_COMPLETO;
+		}
+		break;
 
-    case OBJETOS_COMPLETO:
-        break;
-    }
+	case OBJETOS_COMPLETO:
+		break;
+	}
 }
 
 // Función para actualizar la animación según el estado actual
@@ -2286,22 +2266,22 @@ void UpdateAnimation(float deltaTime)
 
 	case SHRINKING:
 		// Salón viejo reduciéndose
+	{
+		float shrinkFactor = 1.0f - (animationTimer / 1.0f); // 1 segundo para reducir
+		if (shrinkFactor < 0.4f)
 		{
-			float shrinkFactor = 1.0f - (animationTimer / 1.0f); // 1 segundo para reducir
-			if (shrinkFactor < 0.4f)
-			{
-				shrinkFactor = 0.4f;
-			}
-			oldSalonScale = glm::vec3(shrinkFactor);
-
-			if (animationTimer >= 1.0f)
-			{
-				currentState = MOVING_OUT;
-				animationTimer = 0.0f;
-				bulldozerVisible = true;
-			}
+			shrinkFactor = 0.4f;
 		}
-		break;
+		oldSalonScale = glm::vec3(shrinkFactor);
+
+		if (animationTimer >= 1.0f)
+		{
+			currentState = MOVING_OUT;
+			animationTimer = 0.0f;
+			bulldozerVisible = true;
+		}
+	}
+	break;
 
 	case MOVING_OUT:
 	{
@@ -2441,7 +2421,7 @@ void UpdateAnimation(float deltaTime)
 		{
 			// Movimiento horizontal
 			helicopterBasePosition.x -= helicopterSpeed * deltaTime;
-			
+
 			// Efecto de flotación suave
 			helicopterBasePosition.y = 10.0f + 1.5f * sin(glfwGetTime() * 2.0f);
 
@@ -2481,8 +2461,8 @@ void ResetScene()
 	newSalonPosition = glm::vec3(50.0f, 5.0f, 0.0f); // Fuera de la vista
 	newSalonScale = glm::vec3(0.4f);
 	bulldozerBasePosition = glm::vec3(-30.5f, -0.5f, -9.0f);
-	bulldozerBelt1Position = glm::vec3(-2.6f, 2.0f, 3.7);	
-	bulldozerBelt2Position = glm::vec3(-2.6f, 2.0f, -3.5);	
+	bulldozerBelt1Position = glm::vec3(-2.6f, 2.0f, 3.7);
+	bulldozerBelt2Position = glm::vec3(-2.6f, 2.0f, -3.5);
 	bulldozerBelt3Position = glm::vec3(-2.6f, 2.0f, -3.7f);
 	bulldozerBelt4Position = glm::vec3(-2.6f, 2.0f, 3.5f);
 	helicopterBasePosition = glm::vec3(30.0f, 10.0f, -9.0f);
@@ -2490,7 +2470,7 @@ void ResetScene()
 	helicopterRotationY = 270.0f;
 	mainRotorAngle = 0.0f;
 	tailRotorAngle = 0.0f;
-	
+
 	// Restablecer visibilidad
 	oldSalonVisible = true;
 	newSalonVisible = false;
