@@ -33,8 +33,8 @@
 #pragma comment(lib, "winmm.lib")
 
 // ----------------- Function prototypes ----------------- //
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow* window, double xPos, double yPos);
+void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow *window, double xPos, double yPos);
 void DoMovement();
 
 // Sillas
@@ -47,7 +47,7 @@ void animacionComputadora();
 void reiniciarComputadoras();
 
 // Salon
-          void cargarTexturaRuido();
+void cargarTexturaRuido();
 void UpdateAnimation(float deltaTime);
 void ResetScene();
 void manejarObjetos(float deltaTime);
@@ -58,7 +58,7 @@ void animarHumano();
 void interpolarHumano();
 
 // Pizarron
-void animarPizzaron();
+void animarPizarron();
 void interpolarPizarron();
 
 // Proyector
@@ -78,7 +78,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera camera(glm::vec3(20.0f, 10.0f, -22.0f));
+Camera camera(glm::vec3(20.0f, 5.0f, -22.0f));
 float contadorCamara = 0.0;
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -98,7 +98,7 @@ glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 2.0f, 0.0f),
 	glm::vec3(0.0f, 0.0f, 0.0f),
 	glm::vec3(0.0f, 0.0f, 0.0f),
-	glm::vec3(0.0f, 0.0f, 0.0f) };
+	glm::vec3(0.0f, 0.0f, 0.0f)};
 
 float vertices[] = {
 	-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
@@ -141,7 +141,7 @@ float vertices[] = {
 	0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-	-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f };
+	-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f};
 
 glm::vec3 Light1 = glm::vec3(0);
 
@@ -448,7 +448,7 @@ KeyFrameHumano humanoKF[] = {
 	{5.0f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, -15.0f, 0.0f, 15.0f, 0.0f, 15.0f, 0.75},
 	{5.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 15.0f, 0.0f, -15.0f, 0.0f, -15.0f, 0.75},
 	{6.0f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, -15.0f, 0.0f, 15.0f, 0.0f, 15.0f, 0.75},
-	{6.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.75} };
+	{6.5f, 3.15f, -19.0f, 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.75}};
 int nFramesHumano = sizeof(humanoKF) / sizeof(KeyFrameHumano);
 
 // Variables para transformaciones de los modelos
@@ -466,7 +466,8 @@ float humanoPiernaRot = 0.0f;
 int i_max_steps = 190;
 int i_curr_steps = 0;
 
-struct KeyFrameProyector {
+struct KeyFrameProyector
+{
 	float posX, posY, posZ;
 	float rotY;
 	float incX, incY, incZ;
@@ -474,12 +475,12 @@ struct KeyFrameProyector {
 };
 
 KeyFrameProyector ProyectorKF[MAX_FRAMES] = {
-	{ 6.0f, 5.0f, -11.0f, 0.0f },   // posición inicial
-	{ 6.0f, -9.6f, -11.0f, 90.0f },    
-	{ 6.0f, -9.6f, -9.5f, 90.0f }, // esta en el suelo
-	{ 6.0f, -9.6f, -9.5f, 90.0f },
-	{ 8.5f, -9.6f, -9.0f, 90.0f },
-	{ 8.5f, -9.6f, 15.0f, 90.0f },
+	{6.0f, 5.0f, -11.0f, 0.0f}, // posición inicial
+	{6.0f, -9.6f, -11.0f, 90.0f},
+	{6.0f, -9.6f, -9.5f, 90.0f}, // esta en el suelo
+	{6.0f, -9.6f, -9.5f, 90.0f},
+	{8.5f, -9.6f, -9.0f, 90.0f},
+	{8.5f, -9.6f, 15.0f, 90.0f},
 };
 
 int FrameIndexProyector = 6;
@@ -491,30 +492,31 @@ float proyectorRotY = 0.0f;
 // ----------------- Animación del pizarron ----------------- //
 const int MAX_FRAMES_PIZARRON = 18;
 
-struct KeyFramePizarron {
+struct KeyFramePizarron
+{
 	float x, y, z, rotY;
 	float incX, incY, incZ, incRotY;
 };
 
 KeyFramePizarron pizKF[MAX_FRAMES_PIZARRON] = {
-	{ 22.0f, 0.0f, 15.0f, 0.0f },  // Inicio
-	{ 22.0f, 0.0f, -28.0f, 0.0f },  // entra al salon
-	{ 22.0f, 0.0f, -28.0f, 35.0f },  
-	{ 17.0f, 0.0f, -35.0f, 35.0f },
-	{ 17.0f, 0.0f, -35.0f, 45.0f },
-	{ 17.0f, 0.0f, -35.0f, 90.0f },
-	{ 10.0f, 0.0f, -35.0f, 90.0f },
-	{ 10.0f, 0.0f, -37.0f, 45.0f },
-	{ 10.0f, 0.0f, -36.0f, 15.0f }, 
-	{ 10.0f, 0.0f, -36.0f, 0.0f },
-	{ 10.0f, 0.0f, -34.0f, 0.0f },
-	{ 3.0f, 0.0f, -34.0f, 0.0f }, // se acerca a la pared
-	{ 3.0f, 0.0f, -23.0f, 0.0f },
-	{ 3.0f, 3.0f, -23.0f, 0.0f },
-	{ 3.1f, 3.0f, -23.0f, 0.0f },
-	{ 3.1f, 3.0f, -23.0f, 0.0f },
-	{ 3.2f, 3.0f, -23.0f, 0.0f },
-	{ 2.0f, 3.0f, -23.0f, 0.0f },
+	{22.0f, 0.0f, 15.0f, 0.0f},	 // Inicio
+	{22.0f, 0.0f, -28.0f, 0.0f}, // entra al salon
+	{22.0f, 0.0f, -28.0f, 35.0f},
+	{17.0f, 0.0f, -35.0f, 35.0f},
+	{17.0f, 0.0f, -35.0f, 45.0f},
+	{17.0f, 0.0f, -35.0f, 90.0f},
+	{10.0f, 0.0f, -35.0f, 90.0f},
+	{10.0f, 0.0f, -37.0f, 45.0f},
+	{10.0f, 0.0f, -36.0f, 15.0f},
+	{10.0f, 0.0f, -36.0f, 0.0f},
+	{10.0f, 0.0f, -34.0f, 0.0f},
+	{3.0f, 0.0f, -34.0f, 0.0f}, // se acerca a la pared
+	{3.0f, 0.0f, -23.0f, 0.0f},
+	{3.0f, 3.0f, -23.0f, 0.0f},
+	{3.1f, 3.0f, -23.0f, 0.0f},
+	{3.1f, 3.0f, -23.0f, 0.0f},
+	{3.2f, 3.0f, -23.0f, 0.0f},
+	{2.0f, 3.0f, -23.0f, 0.0f},
 };
 bool mostrarPizarron = false;
 int FrameIndexPizarron = MAX_FRAMES_PIZARRON;
@@ -530,24 +532,24 @@ bool mostrarBalon = false;
 float balonRot = 0.0f;
 float balonIncRot = 0.0f;
 
-struct KeyFrameBalon {
+struct KeyFrameBalon
+{
 	float x, y, z;
 	float incX, incY, incZ;
 	float rot;
 };
 
 KeyFrameBalon balonKF[10] = {
-	{ 35.0f, 5.5f, -21.0f, 0.0f },
-	{ 6.0f, 7.0f, -11.0f, 180.0f }, // aqui pega al proyector
-	{ 5.5f, 0.0f, -10.0f, 360.0f }, // aca cae al suele rebote 1
-	{ 5.0f, 2.0f, -9.0f, 540.0f }, 
-	{ 4.5f, 0.0f, -8.0f, 720.0f }, // rebote 2
-	{ 4.3f, 1.5f, -7.0f, 540.0f },
-	{ 4.1f, 0.0f, -6.5f, 720.0f },
-	{ 3.9f, 0.5f, -6.0f, 540.0f },
-	{ 3.8f, 0.0f, -5.5f, 720.0f },
-	{ 3.7f, 0.0f, -5.3f, 720.0f }
-};
+	{35.0f, 5.5f, -21.0f, 0.0f},
+	{6.0f, 7.0f, -11.0f, 180.0f}, // aqui pega al proyector
+	{5.5f, 0.0f, -10.0f, 360.0f}, // aca cae al suele rebote 1
+	{5.0f, 2.0f, -9.0f, 540.0f},
+	{4.5f, 0.0f, -8.0f, 720.0f}, // rebote 2
+	{4.3f, 1.5f, -7.0f, 540.0f},
+	{4.1f, 0.0f, -6.5f, 720.0f},
+	{3.9f, 0.5f, -6.0f, 540.0f},
+	{3.8f, 0.0f, -5.5f, 720.0f},
+	{3.7f, 0.0f, -5.3f, 720.0f}};
 int FrameIndexBalon = 10;
 int PlayIndexBalon = 0;
 int pasosBalon = 0;
@@ -566,7 +568,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "iOS Development Lab - Equipo 10", nullptr, nullptr);
+	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "iOS Development Lab - Equipo 10", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -606,39 +608,39 @@ int main()
 
 	// Load models
 	// Animación del salon
-	Model salonViejo((char*)"Models/salon/EstructuraVieja.obj");
-	Model salonNuevo((char*)"Models/salon/Estructura.obj");
-	Model bulldozerBase((char*)"Models/Bulldozer/Bulldozer.obj");
-	Model bulldozerBelt((char*)"Models/Bulldozer/bulldozerLlanta.obj");
-	Model helicopterBase((char*)"Models/Helicoptero/helicopterBase.obj");
-	Model helicopterRotorMain((char*)"Models/Helicoptero/RotorMain.obj");
-	Model helicopterRotorTail((char*)"Models/Helicoptero/RotorTail.obj");
+	Model salonViejo((char *)"Models/salon/EstructuraVieja.obj");
+	Model salonNuevo((char *)"Models/salon/Estructura.obj");
+	Model bulldozerBase((char *)"Models/Bulldozer/Bulldozer.obj");
+	Model bulldozerBelt((char *)"Models/Bulldozer/bulldozerLlanta.obj");
+	Model helicopterBase((char *)"Models/Helicoptero/helicopterBase.obj");
+	Model helicopterRotorMain((char *)"Models/Helicoptero/RotorMain.obj");
+	Model helicopterRotorTail((char *)"Models/Helicoptero/RotorTail.obj");
 
 	// Animación de las sillas
-	Model sillaVieja((char*)"Models/sillaVieja/sillaVieja.obj");
-	Model sillaNueva((char*)"Models/sillaNueva/sillaNueva.obj");
+	Model sillaVieja((char *)"Models/sillaVieja/sillaVieja.obj");
+	Model sillaNueva((char *)"Models/sillaNueva/sillaNueva.obj");
 
 	// Animación de las computadoras
-	Model computadoraVieja((char*)"Models/compuVieja/compuVieja.obj");
-	Model computadoraNueva((char*)"Models/compuNueva/compuNueva.obj");
+	Model computadoraVieja((char *)"Models/compuVieja/compuVieja.obj");
+	Model computadoraNueva((char *)"Models/compuNueva/compuNueva.obj");
 
 	// Animación del humano
-	Model humanoBrazoDer((char*)"Models/humano/brazoDer.obj");
-	Model humanoBrazoIzq((char*)"Models/humano/brazoIzq.obj");
-	Model humanoCabeza((char*)"Models/humano/cabeza.obj");
-	Model humanoPiernaDer((char*)"Models/humano/piernaDer.obj");
-	Model humanoPiernaIzq((char*)"Models/humano/piernaIzq.obj");
-	Model humanoTorso((char*)"Models/humano/torso.obj");
-	Model iPad((char*)"Models/iPad/iPad.obj");
+	Model humanoBrazoDer((char *)"Models/humano/brazoDer.obj");
+	Model humanoBrazoIzq((char *)"Models/humano/brazoIzq.obj");
+	Model humanoCabeza((char *)"Models/humano/cabeza.obj");
+	Model humanoPiernaDer((char *)"Models/humano/piernaDer.obj");
+	Model humanoPiernaIzq((char *)"Models/humano/piernaIzq.obj");
+	Model humanoTorso((char *)"Models/humano/torso.obj");
+	Model iPad((char *)"Models/iPad/iPad.obj");
 
 	// Animación del proyector
-	Model proyector((char*)"Models/proyectorViejo/proyector.obj");
+	Model proyector((char *)"Models/proyectorViejo/proyector.obj");
 
 	// Animación del pizarron
-	Model pizarron((char*)"Models/pizarronNuevo/pizarron.obj");
+	Model pizarron((char *)"Models/pizarronNuevo/Pizarron.obj");
 
 	// Animación del balon
-	Model balon((char*)"Models/balon/balon.obj");
+	Model balon((char *)"Models/balon/balon.obj");
 
 	// ------------------------------------------------------- //
 	GLfloat skyboxVertices[] = {
@@ -683,7 +685,7 @@ int main()
 		1.0f, -1.0f, -1.0f,
 		1.0f, -1.0f, -1.0f,
 		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f };
+		1.0f, -1.0f, 1.0f};
 
 	GLuint indices[] = {// Note that we start from 0!
 						0, 1, 2, 3,
@@ -694,7 +696,7 @@ int main()
 						20, 21, 22, 23,
 						24, 25, 26, 27,
 						28, 29, 30, 31,
-						32, 33, 34, 35 };
+						32, 33, 34, 35};
 	//------------------
 
 	// First, set the container's VAO (and VBO)
@@ -711,10 +713,10 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
 	glEnableVertexAttribArray(0);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	// Set texture units
@@ -731,10 +733,10 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
 
 	// Load textures
-	vector<const GLchar*> faces;
+	vector<const GLchar *> faces;
 	faces.push_back("SkyBox/px.png"); // +X
 	faces.push_back("SkyBox/nx.png"); // -X
 	faces.push_back("SkyBox/py.png"); // +Y
@@ -772,7 +774,7 @@ int main()
 		animacionComputadora();
 		animarHumano();
 		animarProyector();
-		animarPizzaron();
+		animarPizarron();
 		animarBalon();
 		manejarObjetos(deltaTime);
 		if (animationActive)
@@ -1199,12 +1201,32 @@ int main()
 		}
 
 		// Dibujar proyector
-		if (animacionProyector || PlayIndexProyector < FrameIndexProyector - 1) {
+		if (animacionProyector || PlayIndexProyector < FrameIndexProyector - 1)
+		{
+			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
+			{
+				dissolveShader.Use();
+				glUniform1f(glGetUniformLocation(dissolveShader.Program, "dissolveAmount"), dissolveAmountObjetos);
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+				// Bind noise texture
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, noiseTexture);
+				glUniform1i(glGetUniformLocation(dissolveShader.Program, "noiseMap"), 1);
+			}
+			else
+			{
+				lightingShader.Use();
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			}
+
 			glm::mat4 modelProyector(1);
-			modelProyector = glm::mat4(1);
 			modelProyector = glm::scale(modelProyector, glm::vec3(1.0f));
 			modelProyector = glm::translate(modelProyector, glm::vec3(proyectorPosX, proyectorPosY, proyectorPosZ));
 			modelProyector = glm::rotate(modelProyector, glm::radians(proyectorRotY), glm::vec3(1.0f, 0.0f, 0.0f));
+
 			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
 			{
 				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelProyector));
@@ -1213,16 +1235,37 @@ int main()
 			{
 				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelProyector));
 			}
+
 			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			proyector.Draw(estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO ? dissolveShader : lightingShader);
 		}
 
 		// Dibujar pizarron
-		if (animacionPizarron || mostrarPizarron) {
+		if (animacionPizarron || mostrarPizarron)
+		{
+			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
+			{
+				dissolveShader.Use();
+				glUniform1f(glGetUniformLocation(dissolveShader.Program, "dissolveAmount"), dissolveAmountObjetos);
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+				// Bind noise texture
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, noiseTexture);
+				glUniform1i(glGetUniformLocation(dissolveShader.Program, "noiseMap"), 1);
+			}
+			else
+			{
+				lightingShader.Use();
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			}
+
 			glm::mat4 modelPiz(1);
-			modelPiz = glm::mat4(1);
 			modelPiz = glm::translate(modelPiz, glm::vec3(pizarronPosX, pizarronPosY, pizarronPosZ));
 			modelPiz = glm::rotate(modelPiz, glm::radians(pizarronRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+
 			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
 			{
 				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelPiz));
@@ -1231,17 +1274,38 @@ int main()
 			{
 				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelPiz));
 			}
+
 			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			pizarron.Draw(estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO ? dissolveShader : lightingShader);
 		}
 
 		// Dibujar balon
-		if (mostrarBalon) {    
-			glm::mat4 modelBalon = glm::mat4(1.0f);
+		if (mostrarBalon)
+		{
+			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
+			{
+				dissolveShader.Use();
+				glUniform1f(glGetUniformLocation(dissolveShader.Program, "dissolveAmount"), dissolveAmountObjetos);
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+				// Bind noise texture
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, noiseTexture);
+				glUniform1i(glGetUniformLocation(dissolveShader.Program, "noiseMap"), 1);
+			}
+			else
+			{
+				lightingShader.Use();
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			}
+
+			glm::mat4 modelBalon(1);
 			modelBalon = glm::translate(modelBalon, glm::vec3(balonX, balonY, balonZ));
 			modelBalon = glm::rotate(modelBalon, glm::radians(balonRot), glm::vec3(0.0f, 0.0f, 1.0f));
 			modelBalon = glm::scale(modelBalon, glm::vec3(1.0f));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelBalon));
+
 			if (estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO)
 			{
 				glUniformMatrix4fv(glGetUniformLocation(dissolveShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelBalon));
@@ -1250,9 +1314,10 @@ int main()
 			{
 				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelBalon));
 			}
+
+			glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 			balon.Draw(estadoObjetos != OBJETOS_VISIBLES && estadoObjetos != OBJETOS_COMPLETO ? dissolveShader : lightingShader);
 		}
-
 		// ------------------------------------------------------- //
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -1331,7 +1396,7 @@ void DoMovement()
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -1395,7 +1460,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	// Iniciar animacion del salón
 	if (key == GLFW_KEY_V && action == GLFW_PRESS)
 	{
-		if (estadoObjetos == OBJETOS_VISIBLES)
+		if (currentState == INITIAL || currentState == FINAL)
 		{
 			estadoObjetos = OBJETOS_DISOLVIENDO;
 			dissolveAmountObjetos = 0.0f;
@@ -1524,7 +1589,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 }
 
-void MouseCallback(GLFWwindow* window, double xPos, double yPos)
+void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
@@ -1589,7 +1654,7 @@ void inicializarSillas()
 		// sillas mesa 10
 		glm::vec3(posSillasX19_30, posSillasY, -9.84f),
 		glm::vec3(posSillasX19_30, posSillasY, -7.54f),
-		glm::vec3(posSillasX19_30, posSillasY, -5.24f) };
+		glm::vec3(posSillasX19_30, posSillasY, -5.24f)};
 	float anguloSillas[] = {
 		// silla profesor
 		180.0f,
@@ -1612,7 +1677,7 @@ void inicializarSillas()
 		// sillas mesa 9
 		0.0f, 0.0f, 0.0f,
 		// sillas mesa 10
-		0.0f, 0.0f, 0.0f };
+		0.0f, 0.0f, 0.0f};
 	int estadoAnimacion[] = {
 		// silla profesor
 		1,
@@ -1635,7 +1700,7 @@ void inicializarSillas()
 		// sillas mesa 9
 		12, 12, 12,
 		// sillas mesa 10
-		12, 12, 12 };
+		12, 12, 12};
 
 	for (size_t i = 0; i < 31; i++)
 	{
@@ -2212,7 +2277,7 @@ void animacionComputadora()
 		return;
 	for (int i = 0; i < NUMERO_COMPUTADORAS; ++i)
 	{
-		Computadora& comp = computadoras[i];
+		Computadora &comp = computadoras[i];
 		comp.tiempoEstado += deltaTime;
 		if (!comp.computadoraNueva)
 		{
@@ -2413,75 +2478,64 @@ void cargarTexturaRuido()
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void manejarObjetos(float deltaTime)
-{
-	// Manejar disolución del humano
-	if (humanoDisolviendo)
-	{
-		dissolveAmountHumano += deltaTime * 1.5f;
-		if (dissolveAmountHumano >= 1.0f)
-		{
-			dissolveAmountHumano = 1.0f;
-			humanoDisolviendo = false;
-		}
-	}
-	else if (humanoReapareciendo)
-	{
-		dissolveAmountHumano -= deltaTime * 1.5f;
-		if (dissolveAmountHumano <= 0.0f)
-		{
-			dissolveAmountHumano = 0.0f;
-			humanoReapareciendo = false;
-		}
-	}
+void manejarObjetos(float deltaTime) {
+    // Manejar disolución del humano
+    if (humanoDisolviendo || estadoObjetos == OBJETOS_DISOLVIENDO) {
+        dissolveAmountHumano += deltaTime * 1.5f;
+        if (dissolveAmountHumano >= 1.0f) {
+            dissolveAmountHumano = 1.0f;
+            humanoDisolviendo = false;
+        }
+    }
+    else if (humanoReapareciendo) {
+        dissolveAmountHumano -= deltaTime * 1.5f;
+        if (dissolveAmountHumano <= 0.0f) {
+            dissolveAmountHumano = 0.0f;
+            humanoReapareciendo = false;
+        }
+    }
 
-	switch (estadoObjetos)
-	{
-	case OBJETOS_VISIBLES:
-		break;
+    switch (estadoObjetos) {
+    case OBJETOS_VISIBLES:
+        break;
 
-	case OBJETOS_DISOLVIENDO:
-		dissolveAmountObjetos += deltaTime * 1.5f;
+    case OBJETOS_DISOLVIENDO:
+        dissolveAmountObjetos += deltaTime * 1.5f;
 
-		if (dissolveAmountObjetos >= 1.0f)
-		{
-			dissolveAmountObjetos = 1.0f;
-			estadoObjetos = OBJETOS_ESPERANDO;
-			// Iniciar animación del salón
-			animationActive = true;
-			currentState = SHRINKING;
-			animationTimer = 0.0f;
-		}
-		break;
+        if (dissolveAmountObjetos >= 1.0f) {
+            dissolveAmountObjetos = 1.0f;
+            estadoObjetos = OBJETOS_ESPERANDO;
+            // Iniciar animación del salón
+            animationActive = true;
+            currentState = SHRINKING;
+            animationTimer = 0.0f;
+        }
+        break;
 
-	case OBJETOS_ESPERANDO:
-		// Esperar a que la animación del salón termine
-		if (currentState == FINAL)
-		{
-			tiempoEsperaObjetos += deltaTime;
+    case OBJETOS_ESPERANDO:
+        // La espera ahora se maneja dentro de NEW_FALLING
+        break;
 
-			// Esperar 2 segundos antes de reaparecer
-			if (tiempoEsperaObjetos >= 2.0f)
-			{
-				estadoObjetos = OBJETOS_REAPARECIENDO;
-				humanoReapareciendo = true;
-			}
-		}
-		break;
+    case OBJETOS_REAPARECIENDO:
+        dissolveAmountObjetos -= deltaTime * 1.5f;
 
-	case OBJETOS_REAPARECIENDO:
-		dissolveAmountObjetos -= deltaTime * 1.5f;
+        if (dissolveAmountObjetos <= 0.0f) {
+            dissolveAmountObjetos = 0.0f;
+            estadoObjetos = OBJETOS_COMPLETO;
+            
+            // Reactivar animaciones de objetos si estaban activas antes
+            if (animacionHumano) {
+                // Reiniciar animación del humano si estaba activa
+                frameActualHumano = 0;
+                pasoActualInterpolacionHumano = 0;
+                interpolarHumano();
+            }
+        }
+        break;
 
-		if (dissolveAmountObjetos <= 0.0f)
-		{
-			dissolveAmountObjetos = 0.0f;
-			estadoObjetos = OBJETOS_COMPLETO;
-		}
-		break;
-
-	case OBJETOS_COMPLETO:
-		break;
-	}
+    case OBJETOS_COMPLETO:
+        break;
+    }
 }
 
 // Función para actualizar la animación según el estado actual
@@ -2501,22 +2555,22 @@ void UpdateAnimation(float deltaTime)
 
 	case SHRINKING:
 		// Salón viejo reduciéndose
-	{
-		float shrinkFactor = 1.0f - (animationTimer / 1.0f); // 1 segundo para reducir
-		if (shrinkFactor < 0.4f)
 		{
-			shrinkFactor = 0.4f;
-		}
-		oldSalonScale = glm::vec3(shrinkFactor);
+			float shrinkFactor = 1.0f - (animationTimer / 1.0f); // 1 segundo para reducir
+			if (shrinkFactor < 0.4f)
+			{
+				shrinkFactor = 0.4f;
+			}
+			oldSalonScale = glm::vec3(shrinkFactor);
 
-		if (animationTimer >= 1.0f)
-		{
-			currentState = MOVING_OUT;
-			animationTimer = 0.0f;
-			bulldozerVisible = true;
+			if (animationTimer >= 1.0f)
+			{
+				currentState = MOVING_OUT;
+				animationTimer = 0.0f;
+				bulldozerVisible = true;
+			}
 		}
-	}
-	break;
+		break;
 
 	case MOVING_OUT:
 	{
@@ -2602,13 +2656,14 @@ void UpdateAnimation(float deltaTime)
 				newSalonPosition.y = 0.0f;
 
 				// Rebote si aún tiene energía suficiente
-				if (abs(bounceVelocity) > 0.3f)
-				{
+				if (abs(bounceVelocity) > 0.5f && bounceCount < 3)
+				{ // Máximo 3 rebotes
 					bounceVelocity = -bounceVelocity * BOUNCE_DAMPING;
 					bounceCount++;
 
-					// Escala durante el rebote
-					newSalonScale = glm::vec3(1.0f);
+					// Escala durante el rebote (efecto de "aplastamiento")
+					float squashFactor = 1.0f + (0.2f * (1.0f - (float)bounceCount / 3.0f));
+					newSalonScale = glm::vec3(1.0f * squashFactor, 1.0f / squashFactor, 1.0f * squashFactor);
 				}
 				else
 				{
@@ -2616,7 +2671,13 @@ void UpdateAnimation(float deltaTime)
 					bounceVelocity = 0.0f;
 					hasLanded = true;
 					landingTimer = 0.0f;
+					newSalonScale = glm::vec3(1.0f); // Volver a escala normal
 				}
+			}
+			else
+			{
+				// Escala normal mientras cae
+				newSalonScale = glm::vec3(1.0f);
 			}
 		}
 		else
@@ -2624,14 +2685,19 @@ void UpdateAnimation(float deltaTime)
 			// Transición suave después del último rebote
 			landingTimer += deltaTime;
 			float progress = glm::clamp(landingTimer / 0.5f, 0.0f, 1.0f);
-			newSalonScale = glm::mix(glm::vec3(1.0f), glm::vec3(1.0f), progress); // Mantener escala 1.0
+			newSalonScale = glm::mix(newSalonScale, glm::vec3(1.0f), progress);
 		}
 
 		// Condición para terminar la animación
-		if (hasLanded && landingTimer >= 0.5f)
-		{
+		if (hasLanded && landingTimer >= 1.0f)
+		{ // Esperar 1 segundo después del último rebote
 			currentState = FINAL;
 			newSalonPosition.y = 0.0f; // Asegurar posición exacta
+			newSalonScale = glm::vec3(1.0f);
+
+			// Iniciar transición para reaparecer objetos
+			estadoObjetos = OBJETOS_REAPARECIENDO;
+			humanoReapareciendo = true;
 		}
 	}
 	break;
@@ -2713,6 +2779,13 @@ void ResetScene()
 	helicopterVisible = false;
 	salonEmpezoAMoverse = false;
 
+	// Reiniciar proyector y pizarrón
+	animacionProyector = false;
+	animacionPizarron = false;
+	mostrarPizarron = false;
+	mostrarBalon = false;
+	dissolveAmountObjetos = 0.0f;
+
 	// Restablecer variables de rebote
 	bounceHeight = 0.0f;
 	bounceVelocity = 0.0f;
@@ -2780,25 +2853,30 @@ void animarHumano()
 }
 
 // ------------ Animacion del balon  ------------ //
-void interpolarBalon() {
+void interpolarBalon()
+{
 	balonKF[PlayIndexBalon].incX = (balonKF[PlayIndexBalon + 1].x - balonKF[PlayIndexBalon].x) / maxPasosBalon;
 	balonKF[PlayIndexBalon].incY = (balonKF[PlayIndexBalon + 1].y - balonKF[PlayIndexBalon].y) / maxPasosBalon;
 	balonKF[PlayIndexBalon].incZ = (balonKF[PlayIndexBalon + 1].z - balonKF[PlayIndexBalon].z) / maxPasosBalon;
-	balonIncRot = (balonKF[PlayIndexBalon + 1].rot - balonKF[PlayIndexBalon].rot) / maxPasosBalon; 
+	balonIncRot = (balonKF[PlayIndexBalon + 1].rot - balonKF[PlayIndexBalon].rot) / maxPasosBalon;
 }
 
-void animarBalon() {
-	if (animacionBalon) {
+void animarBalon()
+{
+	if (animacionBalon)
+	{
 		balonX += balonKF[PlayIndexBalon].incX;
 		balonY += balonKF[PlayIndexBalon].incY;
 		balonZ += balonKF[PlayIndexBalon].incZ;
 		balonRot += balonIncRot;
 		pasosBalon++;
 
-		if (pasosBalon >= maxPasosBalon) {
+		if (pasosBalon >= maxPasosBalon)
+		{
 			pasosBalon = 0;
 			PlayIndexBalon++;
-			if (PlayIndexBalon == 1) {
+			if (PlayIndexBalon == 1)
+			{
 				animacionProyector = true;
 				PlayIndexProyector = 0;
 				i_curr_steps = 0;
@@ -2808,10 +2886,12 @@ void animarBalon() {
 				proyectorRotY = ProyectorKF[0].rotY;
 				interpolarProyector();
 			}
-			if (PlayIndexBalon >= FrameIndexBalon - 1) {
+			if (PlayIndexBalon >= FrameIndexBalon - 1)
+			{
 				animacionBalon = false;
 			}
-			else {
+			else
+			{
 				interpolarBalon();
 			}
 		}
@@ -2819,7 +2899,8 @@ void animarBalon() {
 }
 
 // ------------ Animacion del pizarron  ------------ //
-void interpolarPizarron() {
+void interpolarPizarron()
+{
 	pizKF[PlayIndexPizarron].incX = (pizKF[PlayIndexPizarron + 1].x - pizKF[PlayIndexPizarron].x) / maxPasosPizarron;
 	pizKF[PlayIndexPizarron].incY = (pizKF[PlayIndexPizarron + 1].y - pizKF[PlayIndexPizarron].y) / maxPasosPizarron;
 	pizKF[PlayIndexPizarron].incZ = (pizKF[PlayIndexPizarron + 1].z - pizKF[PlayIndexPizarron].z) / maxPasosPizarron;
@@ -2831,19 +2912,27 @@ void interpolarPizarron() {
 	pizarronRotY = pizKF[PlayIndexPizarron].rotY;
 }
 
-void animarPizzaron() {
-	if (animacionPizarron) {
-		if (pasosPizarron >= maxPasosPizarron) {
+void animarPizarron()
+{
+	if (animacionPizarron)
+	{
+		if (pasosPizarron >= maxPasosPizarron)
+		{
 			PlayIndexPizarron++;
-			if (PlayIndexPizarron >= FrameIndexPizarron - 1) {
+			if (PlayIndexPizarron >= FrameIndexPizarron - 1)
+			{
 				animacionPizarron = false;
+				// Hacer desaparecer el balón cuando el pizarrón llega a su posición final
+				mostrarBalon = false;
 			}
-			else {
+			else
+			{
 				pasosPizarron = 0;
 				interpolarPizarron();
 			}
 		}
-		else {
+		else
+		{
 			pizarronPosX += pizKF[PlayIndexPizarron].incX;
 			pizarronPosY += pizKF[PlayIndexPizarron].incY;
 			pizarronPosZ += pizKF[PlayIndexPizarron].incZ;
@@ -2854,39 +2943,47 @@ void animarPizzaron() {
 }
 
 // ------------ Animacion del proyector  ------------ //
-void interpolarProyector() {
+void interpolarProyector()
+{
 	ProyectorKF[PlayIndexProyector].incX = (ProyectorKF[PlayIndexProyector + 1].posX - ProyectorKF[PlayIndexProyector].posX) / i_max_steps;
 	ProyectorKF[PlayIndexProyector].incY = (ProyectorKF[PlayIndexProyector + 1].posY - ProyectorKF[PlayIndexProyector].posY) / i_max_steps;
 	ProyectorKF[PlayIndexProyector].incZ = (ProyectorKF[PlayIndexProyector + 1].posZ - ProyectorKF[PlayIndexProyector].posZ) / i_max_steps;
 	ProyectorKF[PlayIndexProyector].incRotY = (ProyectorKF[PlayIndexProyector + 1].rotY - ProyectorKF[PlayIndexProyector].rotY) / i_max_steps;
 }
 
-void animarProyector() {
-	if (animacionProyector) {
-		if (i_curr_steps >= i_max_steps) {
+void animarProyector()
+{
+	if (animacionProyector)
+	{
+		if (i_curr_steps >= i_max_steps)
+		{
 			PlayIndexProyector++;
-			if (PlayIndexProyector >= FrameIndexProyector - 1) {
+			if (PlayIndexProyector >= FrameIndexProyector - 1)
+			{
 				animacionProyector = false;
-				//Inicia la animación del pizarrón usando los keyframes definidos en pizKF
+				// Inicia la animación del pizarrón usando los keyframes definidos en pizKF
+				animacionBalon = true;
 				animacionPizarron = true;
 				mostrarPizarron = true;
 				pasosPizarron = 0;
 				PlayIndexPizarron = 0;
-				//Posición inicial del pizarrón (primer keyframe)
+				// Posición inicial del pizarrón (primer keyframe)
 				pizarronPosX = pizKF[0].x;
 				pizarronPosY = pizKF[0].y;
 				pizarronPosZ = pizKF[0].z;
 				pizarronRotY = pizKF[0].rotY;
 
-				//Interpolación hacia el siguiente keyframe
+				// Interpolación hacia el siguiente keyframe
 				interpolarPizarron();
 			}
-			else {
+			else
+			{
 				i_curr_steps = 0;
 				interpolarProyector();
 			}
 		}
-		else {
+		else
+		{
 			proyectorPosX += ProyectorKF[PlayIndexProyector].incX;
 			proyectorPosY += ProyectorKF[PlayIndexProyector].incY;
 			proyectorPosZ += ProyectorKF[PlayIndexProyector].incZ;
